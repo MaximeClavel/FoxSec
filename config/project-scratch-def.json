@@ -1,0 +1,26 @@
+{
+  "orgName": "FoxSec Dev Org",
+  "edition": "Developer",
+  "hasSampleData": false,
+  "features": [
+    "SecuritySettings",
+    "LightningServiceConsole",
+    "Communities",
+    "ServiceCloud",
+    "API"
+  ],
+  "settings": {
+    "lightningExperienceSettings": {
+      "enableS1DesktopEnabled": true
+    },
+    "securitySettings": {
+      "sessionSettings": {
+        "forceRelogin": false
+      }
+    },
+    "languageSettings": {
+      "enableTranslationWorkbench": true
+    }
+  },
+  "adminEmail": "foxsec.salesforce@proton.me"
+}
