@@ -9,14 +9,20 @@ public with sharing class FoxSecController {
     
     /**
      * @description Executes all registered audit engines and returns aggregated results.
-     * Currently returns empty list - will be implemented in future iterations.
      * @return List of FoxSecResult objects from all audit engines
      */
     @AuraEnabled(cacheable=true)
     public static List<FoxSecResult> runAllAudits() {
-        // TODO: Implement audit engine registry and execution logic
-        // For now, return empty list to satisfy interface contract
-        return new List<FoxSecResult>();
+        List<FoxSecResult> allResults = new List<FoxSecResult>();
+        
+        // Execute ConfigAuditEngine
+        IFoxSecAuditor configAuditor = new ConfigAuditEngine();
+        allResults.addAll(configAuditor.executeAudit());
+        
+        // Future audit engines will be added here
+        // e.g., UserAuditEngine, PermissionAuditEngine, etc.
+        
+        return allResults;
     }
     
     /**
@@ -38,7 +44,9 @@ public with sharing class FoxSecController {
             // Validate status is one of the allowed values
             if (result.status != FoxSecResult.STATUS_PASS && 
                 result.status != FoxSecResult.STATUS_WARNING && 
-                result.status != FoxSecResult.STATUS_CRITICAL) {
+                result.status != FoxSecResult.STATUS_CRITICAL &&
+                result.status != FoxSecResult.STATUS_SKIPPED &&
+                result.status != FoxSecResult.STATUS_INFO) {
                 return false;
             }
         }

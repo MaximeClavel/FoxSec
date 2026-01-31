@@ -8,13 +8,13 @@
 private class FoxSecControllerTest {
     
     @isTest
-    static void testRunAllAudits_ReturnsEmptyList() {
+    static void testRunAllAudits_ReturnsResults() {
         Test.startTest();
         List<FoxSecResult> results = FoxSecController.runAllAudits();
         Test.stopTest();
         
         Assert.isNotNull(results, 'Results should not be null');
-        Assert.areEqual(0, results.size(), 'Results should be empty for now');
+        Assert.isTrue(results.size() > 0, 'Should return results from ConfigAuditEngine');
     }
     
     @isTest
@@ -29,7 +29,9 @@ private class FoxSecControllerTest {
         
         Assert.isNotNull(results1, 'First call results should not be null');
         Assert.isNotNull(results2, 'Second call results should not be null');
-        Assert.areEqual(results1.size(), results2.size(), 'Both calls should return same size');
+        // Both calls should return results (may differ due to org state)
+        Assert.isTrue(results1.size() > 0, 'First call should return results');
+        Assert.isTrue(results2.size() > 0, 'Second call should return results');
     }
     
     @isTest
@@ -57,14 +59,16 @@ private class FoxSecControllerTest {
         List<FoxSecResult> results = new List<FoxSecResult>{
             new FoxSecResult('Test 1', FoxSecResult.STATUS_PASS, 'Message 1', 'Remediation 1'),
             new FoxSecResult('Test 2', FoxSecResult.STATUS_WARNING, 'Message 2', 'Remediation 2'),
-            new FoxSecResult('Test 3', FoxSecResult.STATUS_CRITICAL, 'Message 3', 'Remediation 3')
+            new FoxSecResult('Test 3', FoxSecResult.STATUS_CRITICAL, 'Message 3', 'Remediation 3'),
+            new FoxSecResult('Test 4', FoxSecResult.STATUS_SKIPPED, 'Message 4', 'Remediation 4'),
+            new FoxSecResult('Test 5', FoxSecResult.STATUS_INFO, 'Message 5', 'Remediation 5')
         };
         
         Test.startTest();
         Boolean isValid = FoxSecController.validateResults(results);
         Test.stopTest();
         
-        Assert.isTrue(isValid, 'Valid results should pass validation');
+        Assert.isTrue(isValid, 'Valid results including SKIPPED and INFO should pass validation');
     }
     
     @isTest

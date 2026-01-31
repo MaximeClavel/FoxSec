@@ -399,7 +399,7 @@ public with sharing class ConfigAuditEngine implements IFoxSecAuditor {
             if (certDescribe == null || !certDescribe.isAccessible()) {
                 results.add(new FoxSecResult(
                     TEST_CERTIFICATES,
-                    'INFO',
+                    FoxSecResult.STATUS_INFO,
                     'Certificate verification not available via standard SOQL. ' +
                     'Check manually: Setup > Security > Certificate and Key Management.',
                     'For automated verification, enable Tooling API access in a future version.'
@@ -468,7 +468,7 @@ public with sharing class ConfigAuditEngine implements IFoxSecAuditor {
             // Certificate object may not be queryable - this is expected in many orgs
             results.add(new FoxSecResult(
                 TEST_CERTIFICATES,
-                'INFO',
+                FoxSecResult.STATUS_INFO,
                 'Certificate verification not available: ' + e.getMessage() + 
                 '. Check manually in Setup.',
                 'Setup > Security > Certificate and Key Management'
@@ -542,7 +542,7 @@ public with sharing class ConfigAuditEngine implements IFoxSecAuditor {
                     // Sandbox - less critical but still worth noting
                     results.add(new FoxSecResult(
                         TEST_LOGIN_AS_ANY_USER,
-                        'INFO',
+                        FoxSecResult.STATUS_INFO,
                         'Sandbox detected (' + String.escapeSingleQuotes(org.Name) + '). ' +
                         '"Login As" is often enabled for debugging. Check policies before refresh to prod.',
                         'Setup > Security > Login Access Policies'
@@ -553,7 +553,7 @@ public with sharing class ConfigAuditEngine implements IFoxSecAuditor {
                 // LoginHistory may not be accessible
                 results.add(new FoxSecResult(
                     TEST_LOGIN_AS_ANY_USER,
-                    'INFO',
+                    FoxSecResult.STATUS_INFO,
                     'Indirect verification not available. Manual check required.',
                     'Setup > Security > Login Access Policies > "Administrators Can Log in as Any User"'
                 ));
@@ -640,7 +640,7 @@ public with sharing class ConfigAuditEngine implements IFoxSecAuditor {
             // Provide guidance on ForceLogout since it's not directly queryable
             results.add(new FoxSecResult(
                 TEST_SESSION_FORCE_LOGOUT,
-                'INFO',
+                FoxSecResult.STATUS_INFO,
                 'The "Force logout on session timeout" setting is not accessible via SOQL. ' +
                 'This setting is critical to prevent session hijacking.',
                 'Check: Setup > Session Settings > "Force logout on session timeout". ' +
@@ -659,7 +659,7 @@ public with sharing class ConfigAuditEngine implements IFoxSecAuditor {
                 // Non-English org - additional security consideration
                 results.add(new FoxSecResult(
                     TEST_SESSION_FORCE_LOGOUT,
-                    'INFO',
+                    FoxSecResult.STATUS_INFO,
                     'Org configured in non-English language (' + orgs[0].LanguageLocaleKey + '). ' +
                     'Verify that security messages are understandable by all admins.',
                     null
@@ -689,7 +689,7 @@ public with sharing class ConfigAuditEngine implements IFoxSecAuditor {
     private FoxSecResult createSkippedResult(String testName, String reason) {
         return new FoxSecResult(
             testName,
-            'SKIPPED',
+            FoxSecResult.STATUS_SKIPPED,
             reason,
             'Verify that the user has "View Setup and Configuration" permission.'
         );

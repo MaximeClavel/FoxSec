@@ -273,8 +273,8 @@ private class ConfigAuditEngineTest {
             FoxSecResult.STATUS_PASS,
             FoxSecResult.STATUS_WARNING,
             FoxSecResult.STATUS_CRITICAL,
-            'SKIPPED',
-            'INFO'
+            FoxSecResult.STATUS_SKIPPED,
+            FoxSecResult.STATUS_INFO
         };
         
         for (FoxSecResult result : results) {

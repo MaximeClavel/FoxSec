@@ -59,4 +59,6 @@ public inherited sharing class FoxSecResult {
     public static final String STATUS_PASS = 'PASS';
     public static final String STATUS_WARNING = 'WARNING';
     public static final String STATUS_CRITICAL = 'CRITICAL';
+    public static final String STATUS_SKIPPED = 'SKIPPED';
+    public static final String STATUS_INFO = 'INFO';
 }
