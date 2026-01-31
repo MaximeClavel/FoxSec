@@ -3,11 +3,11 @@
   "edition": "Developer",
   "hasSampleData": false,
   "features": [
-    "SecuritySettings",
     "LightningServiceConsole",
     "Communities",
     "ServiceCloud",
-    "API"
+    "API",
+    "AuthorApex"
   ],
   "settings": {
     "lightningExperienceSettings": {
@@ -16,10 +16,22 @@
     "securitySettings": {
       "sessionSettings": {
         "forceRelogin": false
+      },
+      "passwordPolicies": {
+        "minimumPasswordLength": 8
+      },
+      "networkAccess": {
+        "ipRanges": []
       }
+    },
+    "enhancedNotesSettings": {
+      "enableEnhancedNotes": true
     },
     "languageSettings": {
       "enableTranslationWorkbench": true
+    },
+    "mobileSettings": {
+      "enableS1EncryptedStoragePref2": false
     }
   },
   "adminEmail": "foxsec.salesforce@proton.me"
