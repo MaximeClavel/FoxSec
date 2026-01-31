@@ -12,7 +12,7 @@
   "name": "FoxSec",
   "namespace": "foxsec",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "62.0",
+  "sourceApiVersion": "65.0",
   "packageAliases": {
     "FoxSec": "0HoXXXXXXXXXXXXXXX"
   }

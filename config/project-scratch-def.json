@@ -28,7 +28,7 @@
       "enableEnhancedNotes": true
     },
     "languageSettings": {
-      "enableTranslationWorkbench": true
+      "enableTranslationWorkbench": false
     },
     "mobileSettings": {
       "enableS1EncryptedStoragePref2": false
