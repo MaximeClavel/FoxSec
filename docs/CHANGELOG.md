@@ -16,6 +16,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.1] - 2026-02-01
+
+### Added
+
+#### Application Metadata
+- **Custom Tab** (`FoxSec_Dashboard.tab-meta.xml`)
+  - Lightning Tab pointing to `foxSecDashboard` LWC
+  - Label: "FoxSec Audit"
+  - Icon: Custom70 (Handshake)
+
+- **Lightning App** (`FoxSec.app-meta.xml`)
+  - Label: "FoxSec Security"
+  - Navigation: Standard
+  - UI Type: Lightning
+  - Default Landing Tab: FoxSec_Dashboard
+
+- **Permission Set** (`FoxSec_Admin.permissionset-meta.xml`)
+  - Label: "FoxSec Admin Access"
+  - Apex Class Access: FoxSecController, ConfigAuditEngine, UserAuditEngine, SharingAuditEngine, FoxSecResult
+  - Tab Visibility: FoxSec_Dashboard (Visible)
+  - App Visibility: FoxSec (Visible)
+  - System Permissions: ViewRoles, ViewSetup
+  - Note: ViewAllData/ModifyAllData intentionally excluded for AppExchange compliance
+
+### Fixed
+
+#### UserAuditEngine
+- **NullPointerException Fix**: Added null-safe checks for `Profile.Name` access
+  - `AutomatedProcess` users and other system users may have null Profile
+  - Affected methods: `auditShadowAdmins()`, `auditWeakPasswordPolicies()`
+  - Pattern: `(u.Profile != null && u.Profile.Name != null) ? u.Profile.Name : 'N/A'`
+
+### Security
+- Permission Set follows AppExchange Security Review best practices
+- ViewAllData not included in package - admins must have it via Profile
+- Minimal privilege principle applied
+
+---
+
 ## [1.2.0] - 2026-02-01
 
 ### Added

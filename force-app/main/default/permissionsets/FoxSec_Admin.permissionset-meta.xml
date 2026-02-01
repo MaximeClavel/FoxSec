@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- File: force-app/main/default/permissionsets/FoxSec_Admin.permissionset-meta.xml -->
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>FoxSec Admin Access</label>
+    <description>Grants access to the FoxSec Security application, dashboard tab, and required Apex classes for security auditing. Note: ViewAllData is required to audit org-wide security settings. ModifyAllData is intentionally excluded for AppExchange compliance.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <license>Salesforce</license>
+
+    <!-- Apex Class Access -->
+    <classAccesses>
+        <apexClass>FoxSecController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ConfigAuditEngine</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>UserAuditEngine</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>SharingAuditEngine</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FoxSecResult</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+
+    <!-- Tab Visibility -->
+    <tabSettings>
+        <tab>FoxSec_Dashboard</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+
+    <!-- Application Visibility -->
+    <applicationVisibilities>
+        <application>FoxSec</application>
+        <visible>true</visible>
+    </applicationVisibilities>
+
+    <!-- System Permissions (Minimal for Security Review compliance) -->
+    <!-- Note: ViewAllData is NOT included here per AppExchange best practices. -->
+    <!-- Admins requiring full audit capabilities should have ViewAllData via their Profile. -->
+    <userPermissions>
+        <enabled>true</enabled>
+        <name>ViewRoles</name>
+    </userPermissions>
+    <userPermissions>
+        <enabled>true</enabled>
+        <name>ViewSetup</name>
+    </userPermissions>
+</PermissionSet>

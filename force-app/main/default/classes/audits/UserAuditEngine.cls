@@ -104,7 +104,8 @@ public with sharing class UserAuditEngine implements IFoxSecAuditor {
                     LIMIT :USER_QUERY_LIMIT
                 ]) {
                     shadowAdminUserIds.add(u.Id);
-                    String source = 'Profile: ' + u.Profile.Name;
+                    String profileName = (u.Profile != null && u.Profile.Name != null) ? u.Profile.Name : 'N/A';
+                    String source = 'Profile: ' + profileName;
                     if (!userPermissionSources.containsKey(u.Id)) {
                         userPermissionSources.put(u.Id, new List<String>());
                     }
@@ -153,12 +154,15 @@ public with sharing class UserAuditEngine implements IFoxSecAuditor {
                 for (User u : shadowAdmins.values()) {
                     List<String> sources = userPermissionSources.get(u.Id);
                     String sourcesStr = sources != null ? String.join(sources, ', ') : 'Unknown';
+                    String profileName = (u.Profile != null && u.Profile.Name != null) 
+                        ? String.escapeSingleQuotes(u.Profile.Name) 
+                        : 'N/A';
                     
                     results.add(new FoxSecResult(
                         TEST_SHADOW_ADMINS,
                         FoxSecResult.STATUS_CRITICAL,
                         'Shadow Admin detected: "' + String.escapeSingleQuotes(u.Username) + 
-                        '" (Profile: ' + String.escapeSingleQuotes(u.Profile.Name) + 
+                        '" (Profile: ' + profileName + 
                         ') has critical permissions via: ' + sourcesStr,
                         'Review and remove unnecessary privileges. ' +
                         'Setup > Users > ' + String.escapeSingleQuotes(u.Name) + 
@@ -453,12 +457,14 @@ public with sharing class UserAuditEngine implements IFoxSecAuditor {
                 ));
                 
                 for (User u : integrationUsers) {
+                    String profileName = (u.Profile != null && u.Profile.Name != null) 
+                        ? String.escapeSingleQuotes(u.Profile.Name) 
+                        : 'N/A';
                     results.add(new FoxSecResult(
                         TEST_WEAK_PASSWORD,
                         FoxSecResult.STATUS_INFO,
                         'Service account identified: "' + String.escapeSingleQuotes(u.Username) + 
-                        '" (Type: ' + u.UserType + ', Profile: ' + 
-                        String.escapeSingleQuotes(u.Profile.Name) + ')',
+                        '" (Type: ' + u.UserType + ', Profile: ' + profileName + ')',
                         'Verify password policy for this account. Consider credential rotation.'
                     ));
                 }

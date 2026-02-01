@@ -39,6 +39,9 @@ FoxSec follows a modular architecture designed for maintainability, testability,
 
 ```
 force-app/main/default/
+├── applications/
+│   └── FoxSec.app-meta.xml            # Lightning App "FoxSec Security"
+│
 ├── classes/
 │   ├── core/                          # Core components
 │   │   ├── FoxSecResult.cls           # Result wrapper
@@ -46,14 +49,21 @@ force-app/main/default/
 │   │   └── IFoxSecAuditor.cls         # Engine interface
 │   │
 │   ├── audits/                        # Audit engines
-│   │   └── ConfigAuditEngine.cls      # Infrastructure audit
+│   │   ├── ConfigAuditEngine.cls      # Infrastructure audit
+│   │   ├── UserAuditEngine.cls        # IAM audit
+│   │   └── SharingAuditEngine.cls     # Sharing rules audit
 │   │
 │   └── audit-modules/                 # Sub-modules (future)
 │
 ├── lwc/                               # Lightning components
 │   └── foxSecDashboard/               # Main dashboard
 │
-├── permissionsets/                    # Permissions
+├── permissionsets/
+│   └── FoxSec_Admin.permissionset-meta.xml  # Admin access
+│
+├── tabs/
+│   └── FoxSec_Dashboard.tab-meta.xml  # Custom Tab
+│
 └── flexipages/                        # Application pages
 ```
 

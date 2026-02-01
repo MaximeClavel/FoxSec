@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- File: force-app/main/default/applications/FoxSec.app-meta.xml -->
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <defaultLandingTab>FoxSec_Dashboard</defaultLandingTab>
+    <description>Security audit and compliance monitoring application for Salesforce administrators.</description>
+    <formFactors>Large</formFactors>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
+    <label>FoxSec Security</label>
+    <navType>Standard</navType>
+    <tabs>FoxSec_Dashboard</tabs>
+    <uiType>Lightning</uiType>
+</CustomApplication>
