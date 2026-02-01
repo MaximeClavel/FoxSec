@@ -110,6 +110,23 @@ Main controller exposing `@AuraEnabled` methods.
 
 ```apex
 public with sharing class FoxSecController {
+    
+    // Inner class for audit summary with score
+    public class AuditSummary {
+        @AuraEnabled public Integer score;
+        @AuraEnabled public Integer totalTests;
+        @AuraEnabled public Integer criticalCount;
+        @AuraEnabled public Integer warningCount;
+        @AuraEnabled public Integer passCount;
+        @AuraEnabled public Integer skippedCount;
+        @AuraEnabled public List<FoxSecResult> results;
+    }
+    
+    @AuraEnabled(cacheable=true)
+    public static AuditSummary getAuditSummary() {
+        // Returns summary with score: 100 - (criticals * 10) - (warnings * 3)
+    }
+    
     @AuraEnabled(cacheable=true)
     public static List<FoxSecResult> runAllAudits() {
         // Orchestrates execution of all engines
@@ -121,6 +138,7 @@ public with sharing class FoxSecController {
 - `with sharing` mandatory (CRUD/FLS compliance)
 - `cacheable=true` for LDS performance
 - Aggregates results from all registered engines
+- Score calculation: `100 - (criticals × 10) - (warnings × 3)`
 
 ---
 
