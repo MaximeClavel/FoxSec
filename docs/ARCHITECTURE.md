@@ -225,7 +225,15 @@ User values are escaped in messages:
         │           ▼
         │    [List<FoxSecResult>]
         │
-        ├──▶ [UserAuditEngine.executeAudit()] (Future)
+        ├──▶ [UserAuditEngine.executeAudit()]
+        │           │
+        │           ├──▶ auditShadowAdmins()
+        │           ├──▶ auditStaleApiUsers()
+        │           ├──▶ auditWeakPasswordPolicies()
+        │           └──▶ auditGuestUserExposure()
+        │           │
+        │           ▼
+        │    [List<FoxSecResult>]
         │
         └──▶ [PermissionAuditEngine.executeAudit()] (Future)
         │
@@ -249,6 +257,7 @@ Each class has its corresponding test file:
 | `FoxSecResult` | `FoxSecResultTest.cls` |
 | `FoxSecController` | `FoxSecControllerTest.cls` |
 | `ConfigAuditEngine` | `ConfigAuditEngineTest.cls` |
+| `UserAuditEngine` | `UserAuditEngineTest.cls` |
 
 ### Minimum Coverage
 
@@ -313,6 +322,15 @@ allResults.addAll(userAuditor.executeAudit());
 │ - auditSession()    │     └─────────────────────┘
 └─────────────────────┘              ▲
                                      │ uses
+┌─────────────────────┐              │
+│   UserAuditEngine   │──────────────┤
+├─────────────────────┤              │
+│ - auditShadowAdmins │              │
+│ - auditStaleApiUser │              │
+│ - auditWeakPassword │              │
+│ - auditGuestUser()  │              │
+└─────────────────────┘              │
+                                     │
 ┌─────────────────────┐              │
 │  FoxSecController   │──────────────┘
 ├─────────────────────┤

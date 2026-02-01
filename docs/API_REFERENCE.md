@@ -284,6 +284,82 @@ The engine automatically detects these patterns as dangerous:
 
 ---
 
+## UserAuditEngine
+
+**Type**: `public with sharing class`  
+**Implements**: `IFoxSecAuditor`  
+**Package**: `foxsec`  
+**File**: [UserAuditEngine.cls](../force-app/main/default/classes/audits/UserAuditEngine.cls)
+
+### Description
+
+Audit engine for Identity & Access Management security. Scans users, profiles, permission sets for excessive privileges and security risks.
+
+### Implemented Tests
+
+| Test Name | Constant | Description |
+|-----------|----------|-------------|
+| Shadow Admins - Excessive Privileges | `TEST_SHADOW_ADMINS` | Non-admin users with admin-level permissions |
+| API Users - Stale Accounts | `TEST_STALE_API_USERS` | API users inactive > 90 days |
+| Password Policy - Never Expires | `TEST_WEAK_PASSWORD` | Service accounts with potential non-expiring passwords |
+| Guest User - Excessive Permissions | `TEST_GUEST_USER_EXPOSURE` | Guest users with write permissions |
+
+### Critical Permissions Detected
+
+```apex
+'PermissionsAuthorApex'        // Can deploy Apex code
+'PermissionsCustomizeApplication'  // Can modify org setup
+'PermissionsManageUsers'       // Can create/modify users
+'PermissionsViewAllData'       // Bypass sharing rules (read)
+'PermissionsModifyAllData'     // Bypass sharing rules (write)
+```
+
+### Public Methods
+
+#### executeAudit
+
+```apex
+public List<FoxSecResult> executeAudit()
+```
+
+Implementation of `IFoxSecAuditor`. Executes all IAM audits.
+
+| Return | Description |
+|--------|-------------|
+| `List<FoxSecResult>` | Findings from all IAM controls |
+
+### Constants
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `STALE_DAYS_THRESHOLD` | `90` | Days of inactivity before flagging API user |
+| `USER_QUERY_LIMIT` | `2000` | Max users per query (governor limits) |
+| `ASSIGNMENT_QUERY_LIMIT` | `5000` | Max permission assignments per query |
+
+### Example Results
+
+**Shadow Admin Detection**:
+```json
+{
+    "testName": "Shadow Admins - Excessive Privileges",
+    "status": "CRITICAL",
+    "message": "Shadow Admin detected: \"john.doe@company.com\" (Profile: Sales User) has critical permissions via: PermissionSet: Sales Admin Override",
+    "remediationSteps": "Review and remove unnecessary privileges. Setup > Users > John Doe > Permission Set Assignments"
+}
+```
+
+**Guest User Exposure**:
+```json
+{
+    "testName": "Guest User - Excessive Permissions",
+    "status": "CRITICAL",
+    "message": "Guest user has write access on object \"Lead\": Create, Edit (via Profile)",
+    "remediationSteps": "Remove write permissions from Guest user profile. Guest users should have minimal read-only access."
+}
+```
+
+---
+
 ## Error Codes and SKIPPED Results
 
 When an audit cannot be executed, a `SKIPPED` result is returned:

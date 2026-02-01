@@ -19,8 +19,12 @@ public with sharing class FoxSecController {
         IFoxSecAuditor configAuditor = new ConfigAuditEngine();
         allResults.addAll(configAuditor.executeAudit());
         
+        // Execute UserAuditEngine
+        IFoxSecAuditor userAuditor = new UserAuditEngine();
+        allResults.addAll(userAuditor.executeAudit());
+        
         // Future audit engines will be added here
-        // e.g., UserAuditEngine, PermissionAuditEngine, etc.
+        // e.g., PermissionAuditEngine, FlowAuditEngine, etc.
         
         return allResults;
     }

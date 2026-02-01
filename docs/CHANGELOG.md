@@ -10,10 +10,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- UserAuditEngine: User audit (MFA, inactivity)
 - PermissionAuditEngine: Sensitive permissions audit
+- FlowAuditEngine: Flow security audit
 - LWC Dashboard: Complete user interface
 - Remediation Flow: Automated corrective actions
+
+---
+
+## [1.1.0] - 2026-01-31
+
+### Added
+
+#### UserAuditEngine
+- **Shadow Admin Detection** (CRITICAL)
+  - Detects non-admin users with `AuthorApex`, `CustomizeApplication`, `ManageUsers`, `ViewAllData`, `ModifyAllData`
+  - Scans both Profile and PermissionSet assignments
+  - Reports permission source for each shadow admin
+
+- **Stale API Users Detection** (WARNING/CRITICAL)
+  - Identifies API-enabled users inactive > 90 days
+  - CRITICAL severity for users who never logged in
+  - Scans both Profile-based and PermissionSet-based API access
+
+- **Weak Password Policy Detection** (WARNING)
+  - Identifies potential service/integration accounts
+  - Detects `AutomatedProcess` user types
+  - Provides org-level password policy guidance
+
+- **Guest User Exposure Detection** (CRITICAL)
+  - Scans Guest users for write permissions (Create, Edit, Delete)
+  - Checks both Profile and PermissionSet ObjectPermissions
+  - AppExchange Security Review blocker alert
+
+#### Tests
+- `UserAuditEngineTest`: Comprehensive IAM engine tests
+  - Interface implementation validation
+  - All audit methods coverage
+  - Governor limits verification
+  - Result formatting validation
+
+### Changed
+- **FoxSecController**: Now executes both `ConfigAuditEngine` and `UserAuditEngine`
+- **Documentation**: Updated ARCHITECTURE.md, API_REFERENCE.md, AUDIT_MODULES.md
+
+### Performance
+- Query limits: `USER_QUERY_LIMIT = 2000`, `ASSIGNMENT_QUERY_LIMIT = 5000`
+- Optimized SOQL with filters in WHERE clauses
+- No post-query loops on large datasets
 
 ---
 
