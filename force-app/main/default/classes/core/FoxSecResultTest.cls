@@ -40,6 +40,8 @@ private class FoxSecResultTest {
         Assert.areEqual('PASS', FoxSecResult.STATUS_PASS, 'STATUS_PASS constant should be PASS');
         Assert.areEqual('WARNING', FoxSecResult.STATUS_WARNING, 'STATUS_WARNING constant should be WARNING');
         Assert.areEqual('CRITICAL', FoxSecResult.STATUS_CRITICAL, 'STATUS_CRITICAL constant should be CRITICAL');
+        Assert.areEqual('SKIPPED', FoxSecResult.STATUS_SKIPPED, 'STATUS_SKIPPED constant should be SKIPPED');
+        Assert.areEqual('INFO', FoxSecResult.STATUS_INFO, 'STATUS_INFO constant should be INFO');
     }
     
     @isTest
