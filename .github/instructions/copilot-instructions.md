@@ -20,6 +20,9 @@ Pour toute demande impliquant du code ou de l'architecture, structure ta répons
    - Fournis le code complet ou les diffs précis.
    - Utilise toujours un commentaire d'en-tête : `// File: force-app/main/default/...`
    - Sépare chaque fichier dans un bloc de code distinct.
+4. **Mise à jour de la Documentation** :
+   - Mets à jour la documentation pertiennente dans `docs/`
+   - Si besoin de nouveaux fichiers, crée-les sous `docs/` avec une structure claire.
 4. **Critères d'Acceptation & Tests** : Scénarios de test, commandes CLI ou edge cases à vérifier.
 
 # Standards de Code Salesforce (Non Négociables)
