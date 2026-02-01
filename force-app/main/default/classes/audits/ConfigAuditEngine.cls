@@ -80,96 +80,29 @@ public with sharing class ConfigAuditEngine implements IFoxSecAuditor {
     private List<FoxSecResult> auditRemoteSiteSettings() {
         List<FoxSecResult> results = new List<FoxSecResult>();
         
-        try {
-            // Query active Remote Site Settings
-            // Using WITH USER_MODE to respect user permissions
-            List<RemoteProxy> remoteSites = [
-                SELECT Id, SiteName, EndpointUrl, IsActive, Description
-                FROM RemoteProxy
-                WHERE IsActive = true
-                WITH USER_MODE
-            ];
-            
-            if (remoteSites.isEmpty()) {
-                results.add(new FoxSecResult(
-                    TEST_REMOTE_SITE_HTTP,
-                    FoxSecResult.STATUS_PASS,
-                    'No active Remote Site detected.',
-                    null
-                ));
-                return results;
-            }
-            
-            Boolean foundHttpIssue = false;
-            Boolean foundWildcardIssue = false;
-            
-            for (RemoteProxy site : remoteSites) {
-                String url = site.EndpointUrl != null ? site.EndpointUrl.toLowerCase() : '';
-                
-                // Check 1: HTTP protocol (non-secure)
-                if (url.startsWith('http://')) {
-                    foundHttpIssue = true;
-                    results.add(new FoxSecResult(
-                        TEST_REMOTE_SITE_HTTP,
-                        FoxSecResult.STATUS_CRITICAL,
-                        'Remote Site "' + String.escapeSingleQuotes(site.SiteName) + 
-                        '" uses insecure HTTP: ' + String.escapeSingleQuotes(url),
-                        'Update URL to HTTPS. Setup > Security > Remote Site Settings > ' + 
-                        String.escapeSingleQuotes(site.SiteName)
-                    ));
-                }
-                
-                // Check 2: Overly permissive wildcards
-                String wildcardIssue = detectRiskyWildcard(url);
-                if (wildcardIssue != null) {
-                    foundWildcardIssue = true;
-                    results.add(new FoxSecResult(
-                        TEST_REMOTE_SITE_WILDCARD,
-                        FoxSecResult.STATUS_WARNING,
-                        'Remote Site "' + String.escapeSingleQuotes(site.SiteName) + 
-                        '" uses overly permissive wildcard: ' + wildcardIssue,
-                        'Restrict URL to a specific subdomain. Broad wildcards expose the org ' +
-                        'to SSRF attacks if the domain hosts third-party content.'
-                    ));
-                }
-            }
-            
-            // Add PASS results if no issues found
-            if (!foundHttpIssue) {
-                results.add(new FoxSecResult(
-                    TEST_REMOTE_SITE_HTTP,
-                    FoxSecResult.STATUS_PASS,
-                    'All active Remote Sites (' + remoteSites.size() + ') use HTTPS.',
-                    null
-                ));
-            }
-            
-            if (!foundWildcardIssue) {
-                results.add(new FoxSecResult(
-                    TEST_REMOTE_SITE_WILDCARD,
-                    FoxSecResult.STATUS_PASS,
-                    'No overly permissive wildcard detected in Remote Sites.',
-                    null
-                ));
-            }
-            
-        } catch (QueryException qe) {
-            results.add(createSkippedResult(
-                TEST_REMOTE_SITE_HTTP,
-                'Unable to scan RemoteProxy: ' + qe.getMessage()
-            ));
-        } catch (System.NoAccessException nae) {
-            results.add(createSkippedResult(
-                TEST_REMOTE_SITE_HTTP,
-                'Access denied to RemoteProxy object. "View Setup" permission required.'
-            ));
-        }
+        // Remote Site Settings (RemoteSiteSetting) cannot be queried via SOQL.
+        // They are Metadata API objects. We provide guidance instead.
+        results.add(new FoxSecResult(
+            TEST_REMOTE_SITE_HTTP,
+            FoxSecResult.STATUS_INFO,
+            'Remote Site Settings audit requires manual review. Navigate to Setup > Security > Remote Site Settings.',
+            'Verify all Remote Sites use HTTPS. Remove any sites using HTTP protocol.'
+        ));
+        
+        results.add(new FoxSecResult(
+            TEST_REMOTE_SITE_WILDCARD,
+            FoxSecResult.STATUS_INFO,
+            'Remote Site wildcard audit requires manual review.',
+            'Review Remote Site URLs for overly permissive wildcards (e.g., *.herokuapp.com, *.amazonaws.com). ' +
+            'Restrict URLs to specific subdomains to prevent SSRF attacks.'
+        ));
         
         return results;
     }
     
     /**
      * @description Detects risky wildcard patterns in URLs.
+     * Kept for potential future use with Metadata API integration.
      * @param url The URL to check.
      * @return String The risky pattern found, or null if safe.
      */
@@ -189,14 +122,14 @@ public with sharing class ConfigAuditEngine implements IFoxSecAuditor {
             }
         }
         
-        // Check for generic wildcard at domain root (e.g., *.example.com where example is a public cloud)
+        // Check for generic wildcard at domain root
         if (hostname.startsWith('*.') && countDomainParts(hostname) <= 2) {
             return hostname;
         }
         
         return null;
     }
-    
+
     /**
      * @description Extracts hostname from a URL.
      * @param url Full URL string.

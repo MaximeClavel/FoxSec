@@ -281,9 +281,10 @@ public with sharing class SharingAuditEngine implements IFoxSecAuditor {
         
         try {
             // Check for ContentDistribution (public links) - these expose files externally
+            // Note: IsPasswordProtected field does not exist on ContentDistribution
             List<ContentDistribution> publicLinks = [
                 SELECT Id, Name, ContentVersionId, ContentDocumentId, 
-                       DistributionPublicUrl, ExpiryDate, IsPasswordProtected
+                       DistributionPublicUrl, ExpiryDate, PreferencesPasswordRequired
                 FROM ContentDistribution
                 WHERE IsDeleted = false
                 WITH USER_MODE
@@ -305,8 +306,8 @@ public with sharing class SharingAuditEngine implements IFoxSecAuditor {
             Integer totalCount = publicLinks.size();
             
             for (ContentDistribution link : publicLinks) {
-                // Check for unprotected links
-                if (link.IsPasswordProtected == false) {
+                // Check for unprotected links (PreferencesPasswordRequired is the correct field)
+                if (link.PreferencesPasswordRequired == false) {
                     unprotectedCount++;
                 }
                 
