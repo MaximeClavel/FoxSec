@@ -14,7 +14,7 @@ private class FoxSecControllerTest {
         Test.stopTest();
         
         Assert.isNotNull(results, 'Results should not be null');
-        Assert.isTrue(results.size() > 0, 'Should return results from ConfigAuditEngine and UserAuditEngine');
+        Assert.isTrue(results.size() > 0, 'Should return results from all registered audit engines');
     }
     
     @isTest

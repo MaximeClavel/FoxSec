@@ -520,4 +520,201 @@ public List<FoxSecResult> executeAudit() {
 
 ---
 
+## 🔐 SharingAuditEngine
+
+**Category**: Data Sharing Security  
+**Class**: `SharingAuditEngine.cls`  
+**Status**: ✅ Implemented (v1.0)
+
+This engine audits data sharing configurations that could expose sensitive data.
+
+### Available Tests
+
+---
+
+### 1. OWD - Account Default Access
+
+| Property | Value |
+|----------|-------|
+| **ID** | `TEST_OWD_ACCOUNT` |
+| **Max Severity** | 🔴 CRITICAL |
+| **Scanned Object** | `Organization` |
+
+**Description**  
+Detects if Account Organization-Wide Default (OWD) is set to "Public Read/Write".
+
+**Risk**  
+When OWD is "Public Read/Write" (ReadWrite), ALL users can view AND edit ALL Account records. No hierarchy-based protection exists.
+
+**Detection Criteria**
+- `DefaultAccountAccess = 'ReadWrite'` or `'Edit'` or `'ReadWriteTransfer'`
+
+**Example Finding**
+```json
+{
+    "testName": "OWD - Account Default Access",
+    "status": "CRITICAL",
+    "message": "Account OWD is set to \"ReadWrite\" (Public Read/Write). All users can view AND edit all Account records.",
+    "remediationSteps": "Setup > Security > Sharing Settings > Account > Change to \"Private\" or \"Public Read Only\". Use sharing rules for controlled access."
+}
+```
+
+**Remediation**
+1. Go to Setup → Security → Sharing Settings
+2. Edit Organization-Wide Defaults
+3. Change Account to "Private" or "Public Read Only"
+4. Create Sharing Rules for necessary access
+
+---
+
+### 2. OWD - Contact Default Access
+
+| Property | Value |
+|----------|-------|
+| **ID** | `TEST_OWD_CONTACT` |
+| **Max Severity** | 🔴 CRITICAL |
+| **Scanned Object** | `Organization` |
+
+**Description**  
+Detects if Contact Organization-Wide Default is set to "Public Read/Write".
+
+**Risk**  
+Contact records often contain PII (Personally Identifiable Information). Public Read/Write exposes all contact data to all users.
+
+**Remediation**
+1. Setup → Security → Sharing Settings
+2. Set Contact OWD to "Controlled by Parent" or "Private"
+3. Implement need-to-know access via sharing rules
+
+---
+
+### 3. OWD - Case Default Access
+
+| Property | Value |
+|----------|-------|
+| **ID** | `TEST_OWD_CASE` |
+| **Max Severity** | 🔴 CRITICAL |
+| **Scanned Object** | `Organization` |
+
+**Description**  
+Detects if Case Organization-Wide Default is set to "Public Read/Write".
+
+**Risk**  
+Case records may contain:
+- Customer complaints
+- Support history
+- Internal notes
+- Sensitive issue details
+
+Public Read/Write exposes all this information to all users.
+
+**Remediation**
+1. Setup → Security → Sharing Settings
+2. Set Case OWD to "Private"
+3. Use case assignment rules and sharing rules for controlled access
+
+---
+
+### 4. External Sharing Model Configuration
+
+| Property | Value |
+|----------|-------|
+| **ID** | `TEST_EXTERNAL_SHARING` |
+| **Max Severity** | ⚠️ WARNING |
+| **Scanned Object** | `Organization` |
+
+**Description**  
+Detects when External Sharing Model matches Internal Sharing (potential misconfiguration).
+
+**Risk**  
+When external sharing equals internal sharing, external users (Partners, Communities) have the same data access as internal users. This is often unintended and violates data segregation principles.
+
+**Detection Criteria**
+- External access level equals internal access level
+- External access is not "Private" (both Private is acceptable)
+
+**Example Finding**
+```json
+{
+    "testName": "External Sharing Model Configuration",
+    "status": "WARNING",
+    "message": "Account: External sharing (\"Read\") matches internal sharing. External users have same access as internal users.",
+    "remediationSteps": "Review Setup > Security > Sharing Settings. External users should typically have more restrictive access than internal users."
+}
+```
+
+**Remediation**
+1. Setup → Security → Sharing Settings
+2. Enable separate External Sharing Model if not enabled
+3. Set more restrictive access for external users
+4. Review Community/Partner user access requirements
+
+---
+
+### 5. Content Asset - Public File Exposure
+
+| Property | Value |
+|----------|-------|
+| **ID** | `TEST_PUBLIC_FILES` |
+| **Max Severity** | ⚠️ WARNING |
+| **Scanned Object** | `ContentDistribution` |
+
+**Description**  
+Detects publicly shared files (Content Deliveries) that lack password protection.
+
+**Risk**  
+Files shared via Content Delivery without password protection can be accessed by anyone with the URL. This creates risk of:
+- Data leakage
+- Unauthorized document access
+- Compliance violations (GDPR, HIPAA)
+
+**Detection Criteria**
+- `ContentDistribution` records where `IsPasswordProtected = false`
+- Expired distribution links still in system
+
+**Example Finding**
+```json
+{
+    "testName": "Content Asset - Public File Exposure",
+    "status": "WARNING",
+    "message": "15 of 42 public file links are not password protected. Anyone with the URL can download.",
+    "remediationSteps": "Review Content Deliveries in Setup. Enable password protection or set expiration dates for sensitive files. Consider using authenticated sharing instead."
+}
+```
+
+**Remediation**
+1. Setup → Content Deliveries
+2. Review all active distributions
+3. Enable password protection for sensitive files
+4. Set appropriate expiration dates
+5. Delete obsolete distributions
+6. Consider using authenticated sharing (Lightning File Download) instead
+
+---
+
+### Technical Notes
+
+**Mocking Organization Data**  
+The `Organization` object is read-only in Salesforce. The engine uses `@TestVisible` mock data pattern:
+
+```apex
+// In test class
+SharingAuditEngine.mockOrgSettings = new SharingAuditEngine.OrgSharingSettings();
+mockOrgSettings.defaultAccountAccess = 'ReadWrite';
+// ... run tests ...
+```
+
+**OWD Value Reference**
+| API Value | Display Name | Risk |
+|-----------|--------------|------|
+| `Private` | Private | ✅ Safe |
+| `Read` | Public Read Only | ✅ Safe |
+| `ReadWrite` | Public Read/Write | 🔴 Critical |
+| `Edit` | Public Read/Write | 🔴 Critical |
+| `ReadWriteTransfer` | Public Read/Write/Transfer | 🔴 Critical |
+| `ControlledByParent` | Controlled by Parent | ✅ Safe |
+| `ControlledByCampaign` | Controlled by Campaign | ✅ Safe |
+
+---
+
 *For technical details, see [API_REFERENCE.md](./API_REFERENCE.md).*
