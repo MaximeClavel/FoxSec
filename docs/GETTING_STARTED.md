@@ -72,11 +72,28 @@ sf org open
 
 ## First Use
 
+### Assign Permission Set
+
+Before accessing the application, assign the FoxSec Admin permission set:
+
+```bash
+# Assign permission set to current user
+sf org assign permset --name FoxSec_Admin
+```
+
+Or manually:
+1. **Setup** → **Users** → Select your user
+2. **Permission Set Assignments** → **Edit Assignments**
+3. Add **FoxSec Admin Access**
+
+> **Note**: For full audit capabilities, the user should also have **ViewAllData** permission via their Profile. This is intentionally not included in the permission set for AppExchange compliance.
+
 ### Access the Dashboard
 
 1. Open the org: `sf org open`
-2. Navigate to **App Launcher** → **FoxSec**
-3. The dashboard automatically displays audit results
+2. Navigate to **App Launcher** → **FoxSec Security**
+3. Click on the **FoxSec Audit** tab
+4. The dashboard automatically displays audit results
 
 ### Run a Manual Audit
 
