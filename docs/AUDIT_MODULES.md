@@ -225,16 +225,204 @@ Without forced logout, an abandoned session can be reused by an attacker with br
 
 ---
 
+## � UserAuditEngine
+
+**Category**: Identity & Access Management  
+**Class**: `UserAuditEngine.cls`  
+**Status**: ✅ Implemented (v1.1)
+
+This engine audits user access, privileges, and IAM-related security risks.
+
+### Available Tests
+
+---
+
+### 1. Shadow Admins - Excessive Privileges
+
+| Property | Value |
+|----------|-------|
+| **ID** | `TEST_SHADOW_ADMINS` |
+| **Max Severity** | 🔴 CRITICAL |
+| **Scanned Objects** | `User`, `Profile`, `PermissionSet`, `PermissionSetAssignment` |
+
+**Description**  
+Detects "Shadow Admins" - users who are NOT System Administrators but have critical system permissions that grant admin-level access.
+
+**Risk**  
+Shadow admins can:
+- Deploy Apex code (backdoors)
+- Modify org configuration
+- Access all data regardless of sharing rules
+- Create/modify user accounts
+
+**Critical Permissions Detected**
+| Permission | Risk Level |
+|------------|------------|
+| `AuthorApex` | Can deploy malicious code |
+| `CustomizeApplication` | Can modify org setup |
+| `ManageUsers` | Can create/modify users |
+| `ViewAllData` | Bypass all data sharing |
+| `ModifyAllData` | Full data access |
+
+**Detection Logic**
+1. Query Profiles (non-admin) with critical permissions
+2. Query PermissionSets with critical permissions
+3. Find active users assigned to these Profiles/PermissionSets
+4. Report each user with the source of their privileges
+
+**Example Finding**
+```json
+{
+    "testName": "Shadow Admins - Excessive Privileges",
+    "status": "CRITICAL",
+    "message": "Shadow Admin detected: \"john.doe@company.com\" (Profile: Sales User) has critical permissions via: PermissionSet: Sales Admin Override",
+    "remediationSteps": "Review and remove unnecessary privileges. Setup > Users > John Doe > Permission Set Assignments"
+}
+```
+
+**Remediation**
+1. Setup → Users → [Affected User] → Permission Set Assignments
+2. Remove permission sets granting critical permissions
+3. Apply Principle of Least Privilege
+4. Use dedicated admin accounts for admin tasks
+
+---
+
+### 2. API Users - Stale Accounts
+
+| Property | Value |
+|----------|-------|
+| **ID** | `TEST_STALE_API_USERS` |
+| **Max Severity** | 🔴 CRITICAL (never logged in) / ⚠️ WARNING (stale) |
+| **Scanned Objects** | `User`, `Profile`, `PermissionSet`, `PermissionSetAssignment` |
+
+**Description**  
+Identifies users with API access (via Profile or PermissionSet) who haven't logged in for more than 90 days.
+
+**Risk**  
+Stale API accounts are security risks:
+- Credentials may be compromised without detection
+- No active monitoring of account activity
+- Potential entry point for attackers
+
+**Detection Criteria**
+| Condition | Severity |
+|-----------|----------|
+| API-enabled, never logged in | CRITICAL |
+| API-enabled, no login > 90 days | WARNING |
+| API-enabled, active | PASS |
+
+**Threshold**: 90 days (configurable via `STALE_DAYS_THRESHOLD`)
+
+**Example Finding**
+```json
+{
+    "testName": "API Users - Stale Accounts",
+    "status": "WARNING",
+    "message": "Stale API user: \"integration.user@company.com\" - Last login: 2025-10-15 (108 days ago)",
+    "remediationSteps": "Review API user necessity. Deactivate or rotate credentials if unused."
+}
+```
+
+**Remediation**
+1. Review the business need for each stale API account
+2. Deactivate unused accounts
+3. Rotate credentials for active accounts
+4. Implement regular access reviews (quarterly)
+
+---
+
+### 3. Password Policy - Never Expires
+
+| Property | Value |
+|----------|-------|
+| **ID** | `TEST_WEAK_PASSWORD` |
+| **Max Severity** | ⚠️ WARNING |
+| **Scanned Objects** | `User`, `Profile` |
+
+**Description**  
+Identifies potential service/integration accounts that may have non-expiring passwords configured.
+
+**Risk**  
+Non-expiring passwords:
+- Increase credential compromise exposure window
+- Often paired with weak passwords
+- Non-compliant with security standards (SOC2, ISO27001)
+
+**Detection Logic**
+- Identifies accounts with usernames containing: `integration`, `api`, `service`, `system`
+- Detects `AutomatedProcess` user types
+- Provides guidance for org-level password policy review
+
+**Example Finding**
+```json
+{
+    "testName": "Password Policy - Never Expires",
+    "status": "WARNING",
+    "message": "Found 3 potential integration/service accounts. These often have non-expiring passwords configured.",
+    "remediationSteps": "Review password policies for service accounts. Consider using OAuth instead of passwords."
+}
+```
+
+**Remediation**
+1. Setup → Security → Password Policies
+2. Set "User passwords expire in" to 90 days or less
+3. For integrations: migrate to OAuth 2.0 / JWT instead of passwords
+4. Implement credential rotation procedures
+
+---
+
+### 4. Guest User - Excessive Permissions
+
+| Property | Value |
+|----------|-------|
+| **ID** | `TEST_GUEST_USER_EXPOSURE` |
+| **Max Severity** | 🔴 CRITICAL |
+| **Scanned Objects** | `User`, `ObjectPermissions`, `PermissionSet`, `PermissionSetAssignment` |
+
+**Description**  
+Identifies Guest users (Site/Community public users) with write permissions on objects.
+
+**Risk**  
+Guest users with write access can:
+- Create spam/malicious records
+- Modify or delete data
+- Exploit data model for injection attacks
+- **AppExchange Security Review BLOCKER**
+
+**Detection Criteria**
+| Condition | Severity |
+|-----------|----------|
+| Guest with Create/Edit/Delete on any object (via Profile) | CRITICAL |
+| Guest with Create/Edit/Delete on any object (via PermissionSet) | CRITICAL |
+| Guest with PermissionSet assigned (no write perms) | WARNING |
+| Guest with read-only access | PASS |
+
+**Objects Checked**
+- Profile-level ObjectPermissions
+- PermissionSet-assigned ObjectPermissions
+- Any object with `PermissionsCreate`, `PermissionsEdit`, or `PermissionsDelete` = true
+
+**Example Finding**
+```json
+{
+    "testName": "Guest User - Excessive Permissions",
+    "status": "CRITICAL",
+    "message": "Guest user has write access on object \"Lead\": Create, Edit (via Profile)",
+    "remediationSteps": "Remove write permissions from Guest user profile. Guest users should have minimal read-only access."
+}
+```
+
+**Remediation**
+1. Setup → Sites → [Your Site] → Public Access Settings
+2. Remove Create/Edit/Delete permissions from all objects
+3. Only allow Read on strictly necessary objects
+4. Review all PermissionSets assigned to Guest users
+5. Consider using authenticated Experience Cloud instead of public access
+
+---
+
 ## 🚧 Planned Modules (Roadmap)
-
-### UserAuditEngine (v1.1)
-
-| Planned Test | Description |
-|--------------|-------------|
-| Inactive Users | Users inactive for > 90 days |
-| Users Without MFA | Users without multi-factor authentication |
-| External Users Access | Community/Portal user access |
-| Password Policy | Password policy verification |
 
 ### PermissionAuditEngine (v1.2)
 
