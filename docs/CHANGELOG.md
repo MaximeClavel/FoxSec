@@ -12,8 +12,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Planned
 - PermissionAuditEngine: Sensitive permissions audit
 - FlowAuditEngine: Flow security audit
-- LWC Dashboard: Complete user interface
 - Remediation Flow: Automated corrective actions
+
+---
+
+## [1.2.0] - 2026-02-01
+
+### Added
+
+#### FoxSecController
+- **AuditSummary Inner Class**: Wrapper containing score, statistics, and detailed results
+- **getAuditSummary() Method**: Returns aggregated audit data with security score calculation
+  - Score formula: `100 - (criticals × 10) - (warnings × 3)`
+  - Minimum score capped at 0
+
+#### foxSecDashboard (LWC)
+- **Security Score Gauge**: SVG-based semicircle gauge with animated fill
+  - Color coding: Green (≥80), Yellow (50-79), Red (<50)
+  - Real-time score display in center
+- **Statistics Cards**: Visual summary of Critical, Warning, Pass, and Total counts
+  - Hover effects and color-coded borders
+- **Audit Results DataTable**: Sortable table with all audit findings
+  - Impact column with SLDS badges (red for CRITICAL, yellow for WARNING)
+  - Custom sorting by severity level
+  - Wrap text support for long messages
+- **Refresh Button**: Manual audit re-execution with loading state
+- **Responsive Design**: Mobile-friendly layout with CSS media queries
+
+### Changed
+- `FoxSecController.runAllAudits()` now also usable standalone (unchanged API)
 
 ---
 

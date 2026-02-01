@@ -1,0 +1,121 @@
+<!-- File: force-app/main/default/lwc/foxSecDashboard/foxSecDashboard.html -->
+<template>
+    <lightning-card title="FoxSec Security Dashboard" icon-name="custom:custom55">
+        <!-- Loading Spinner -->
+        <template lwc:if={isLoading}>
+            <div class="slds-align_absolute-center slds-m-around_large">
+                <lightning-spinner alternative-text="Loading audit results..." size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Error State -->
+        <template lwc:if={error}>
+            <div class="slds-notify slds-notify_alert slds-alert_error slds-m-around_medium" role="alert">
+                <span class="slds-assistive-text">Error</span>
+                <lightning-icon icon-name="utility:error" alternative-text="Error" size="small" class="slds-m-right_x-small"></lightning-icon>
+                <h2>{errorMessage}</h2>
+            </div>
+        </template>
+
+        <!-- Dashboard Content -->
+        <template lwc:if={hasData}>
+            <!-- Score Gauge Section -->
+            <div class="slds-p-around_medium">
+                <div class="slds-grid slds-gutters slds-wrap">
+                    <!-- Gauge Chart -->
+                    <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3">
+                        <div class="gauge-container slds-align_absolute-center">
+                            <div class="gauge-wrapper">
+                                <svg viewBox="0 0 200 120" class="gauge-svg">
+                                    <!-- Background arc -->
+                                    <path 
+                                        d="M 20 100 A 80 80 0 0 1 180 100" 
+                                        fill="none" 
+                                        stroke="#e0e5ee" 
+                                        stroke-width="16"
+                                        stroke-linecap="round">
+                                    </path>
+                                    <!-- Score arc -->
+                                    <path 
+                                        d="M 20 100 A 80 80 0 0 1 180 100" 
+                                        fill="none" 
+                                        class={gaugeColorClass}
+                                        stroke-width="16"
+                                        stroke-linecap="round"
+                                        stroke-dasharray={gaugeDashArray}
+                                        stroke-dashoffset={gaugeDashOffset}>
+                                    </path>
+                                </svg>
+                                <div class="gauge-score">
+                                    <span class={scoreTextClass}>{score}</span>
+                                    <span class="gauge-label">Security Score</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Cards -->
+                    <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                        <div class="slds-grid slds-gutters slds-wrap">
+                            <!-- Critical Issues -->
+                            <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-around_x-small">
+                                <div class="stat-card stat-card-critical">
+                                    <div class="stat-value">{criticalCount}</div>
+                                    <div class="stat-label">Critical</div>
+                                </div>
+                            </div>
+                            <!-- Warnings -->
+                            <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-around_x-small">
+                                <div class="stat-card stat-card-warning">
+                                    <div class="stat-value">{warningCount}</div>
+                                    <div class="stat-label">Warnings</div>
+                                </div>
+                            </div>
+                            <!-- Passed -->
+                            <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-around_x-small">
+                                <div class="stat-card stat-card-pass">
+                                    <div class="stat-value">{passCount}</div>
+                                    <div class="stat-label">Passed</div>
+                                </div>
+                            </div>
+                            <!-- Total -->
+                            <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-around_x-small">
+                                <div class="stat-card stat-card-total">
+                                    <div class="stat-value">{totalTests}</div>
+                                    <div class="stat-label">Total Tests</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slds-border_top"></div>
+
+            <!-- Results Data Table -->
+            <div class="slds-p-around_medium">
+                <h2 class="slds-text-heading_small slds-m-bottom_medium">Audit Results</h2>
+                <lightning-datatable
+                    key-field="id"
+                    data={tableData}
+                    columns={columns}
+                    hide-checkbox-column
+                    show-row-number-column
+                    sorted-by={sortedBy}
+                    sorted-direction={sortedDirection}
+                    onsort={handleSort}>
+                </lightning-datatable>
+            </div>
+
+            <!-- Refresh Button -->
+            <div slot="actions">
+                <lightning-button 
+                    label="Refresh Audit" 
+                    icon-name="utility:refresh"
+                    onclick={handleRefresh}
+                    disabled={isLoading}>
+                </lightning-button>
+            </div>
+        </template>
+    </lightning-card>
+</template>

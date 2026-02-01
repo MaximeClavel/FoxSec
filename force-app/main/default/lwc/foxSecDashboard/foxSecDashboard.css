@@ -1,0 +1,189 @@
+/* File: force-app/main/default/lwc/foxSecDashboard/foxSecDashboard.css */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Gauge Chart Styles
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.gauge-container {
+    width: 100%;
+    max-width: 250px;
+    padding: 1rem;
+}
+
+.gauge-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.gauge-svg {
+    width: 100%;
+    height: auto;
+}
+
+/* Gauge stroke colors */
+.gauge-stroke {
+    transition: stroke-dashoffset 0.8s ease-in-out;
+}
+
+.gauge-stroke-success {
+    stroke: #04844b; /* SLDS success */
+}
+
+.gauge-stroke-warning {
+    stroke: #ff9a3c; /* SLDS warning */
+}
+
+.gauge-stroke-critical {
+    stroke: #c23934; /* SLDS error */
+}
+
+/* Score display in center of gauge */
+.gauge-score {
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.gauge-score-value {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.gauge-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #706e6b;
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Score text colors */
+.score-success {
+    color: #04844b;
+}
+
+.score-warning {
+    color: #ff9a3c;
+}
+
+.score-critical {
+    color: #c23934;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Statistics Cards Styles
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.stat-card {
+    border-radius: 0.5rem;
+    padding: 1rem;
+    text-align: center;
+    background: #f3f2f2;
+    border-left: 4px solid transparent;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card-critical {
+    border-left-color: #c23934;
+    background: linear-gradient(135deg, #fef1f1 0%, #fff 100%);
+}
+
+.stat-card-warning {
+    border-left-color: #ff9a3c;
+    background: linear-gradient(135deg, #fff8f0 0%, #fff 100%);
+}
+
+.stat-card-pass {
+    border-left-color: #04844b;
+    background: linear-gradient(135deg, #f0faf5 0%, #fff 100%);
+}
+
+.stat-card-total {
+    border-left-color: #0176d3;
+    background: linear-gradient(135deg, #f0f7ff 0%, #fff 100%);
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.stat-card-critical .stat-value {
+    color: #c23934;
+}
+
+.stat-card-warning .stat-value {
+    color: #ff9a3c;
+}
+
+.stat-card-pass .stat-value {
+    color: #04844b;
+}
+
+.stat-card-total .stat-value {
+    color: #0176d3;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #706e6b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.25rem;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Impact Badge Styles (DataTable)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.badge-critical {
+    background-color: #c23934;
+    color: #fff;
+    font-weight: 600;
+}
+
+.badge-warning {
+    background-color: #ff9a3c;
+    color: #080707;
+    font-weight: 600;
+}
+
+.badge-pass {
+    background-color: #04844b;
+    color: #fff;
+    font-weight: 600;
+}
+
+.badge-info {
+    background-color: #706e6b;
+    color: #fff;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Responsive Adjustments
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+    .gauge-container {
+        max-width: 200px;
+    }
+
+    .gauge-score-value {
+        font-size: 2rem;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+}

@@ -151,7 +151,48 @@ public with sharing class CustomAuditEngine implements IFoxSecAuditor {
 
 Main controller for FoxSec audit operations. Orchestrates the execution of all registered audit engines and aggregates results.
 
+### Inner Classes
+
+#### AuditSummary
+
+Wrapper class for audit summary with score and statistics.
+
+| Property | Type | Access | Description |
+|----------|------|--------|-------------|
+| `score` | `Integer` | `@AuraEnabled` | Global security score (0-100) |
+| `totalTests` | `Integer` | `@AuraEnabled` | Total number of tests executed |
+| `criticalCount` | `Integer` | `@AuraEnabled` | Number of CRITICAL results |
+| `warningCount` | `Integer` | `@AuraEnabled` | Number of WARNING results |
+| `passCount` | `Integer` | `@AuraEnabled` | Number of PASS results |
+| `skippedCount` | `Integer` | `@AuraEnabled` | Number of SKIPPED/INFO results |
+| `results` | `List<FoxSecResult>` | `@AuraEnabled` | Detailed audit results |
+
+**Score Calculation**:
+```
+score = 100 - (criticalCount × 10) - (warningCount × 3)
+minimum = 0
+```
+
 ### Public Methods
+
+#### getAuditSummary
+
+```apex
+@AuraEnabled(cacheable=true)
+public static AuditSummary getAuditSummary()
+```
+
+Executes all registered audit engines and returns an aggregated summary with score and statistics.
+
+| Return | Description |
+|--------|-------------|
+| `AuditSummary` | Summary containing score, statistics, and detailed results |
+
+**Characteristics**:
+- `@AuraEnabled`: Accessible from LWC/Aura
+- `cacheable=true`: Results cached by Lightning Data Service
+- Respects sharing model (`with sharing`)
+- Calculates security score automatically
 
 #### runAllAudits
 
@@ -174,18 +215,19 @@ Executes all registered audit engines and returns aggregated results.
 ### Usage Example (Apex)
 
 ```apex
-// Execute all audits
-List<FoxSecResult> results = FoxSecController.runAllAudits();
+// Execute audit with summary
+FoxSecController.AuditSummary summary = FoxSecController.getAuditSummary();
+System.debug('Security Score: ' + summary.score);
+System.debug('Critical Issues: ' + summary.criticalCount);
+System.debug('Warnings: ' + summary.warningCount);
 
 // Filter critical results
 List<FoxSecResult> criticals = new List<FoxSecResult>();
-for (FoxSecResult r : results) {
+for (FoxSecResult r : summary.results) {
     if (r.status == FoxSecResult.STATUS_CRITICAL) {
         criticals.add(r);
     }
 }
-
-System.debug('Found ' + criticals.size() + ' critical issues.');
 ```
 
 ### Usage Example (LWC)
@@ -193,23 +235,22 @@ System.debug('Found ' + criticals.size() + ' critical issues.');
 ```javascript
 // foxSecDashboard.js
 import { LightningElement, wire } from 'lwc';
-import runAllAudits from '@salesforce/apex/FoxSecController.runAllAudits';
+import getAuditSummary from '@salesforce/apex/FoxSecController.getAuditSummary';
 
 export default class FoxSecDashboard extends LightningElement {
-    @wire(runAllAudits)
-    wiredResults({ error, data }) {
+    score = 0;
+    criticalCount = 0;
+    results = [];
+
+    @wire(getAuditSummary)
+    wiredSummary({ error, data }) {
         if (data) {
-            this.auditResults = data;
-            this.countCriticals();
+            this.score = data.score;
+            this.criticalCount = data.criticalCount;
+            this.results = data.results;
         } else if (error) {
             this.handleError(error);
         }
-    }
-    
-    countCriticals() {
-        this.criticalCount = this.auditResults.filter(
-            r => r.status === 'CRITICAL'
-        ).length;
     }
 }
 ```

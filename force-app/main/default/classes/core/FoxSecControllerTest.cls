@@ -7,6 +7,73 @@
 @isTest
 private class FoxSecControllerTest {
     
+    // ─────────────────────────────────────────────────────────────────────────────
+    // getAuditSummary Tests
+    // ─────────────────────────────────────────────────────────────────────────────
+    
+    @isTest
+    static void testGetAuditSummary_ReturnsSummary() {
+        Test.startTest();
+        FoxSecController.AuditSummary summary = FoxSecController.getAuditSummary();
+        Test.stopTest();
+        
+        Assert.isNotNull(summary, 'Summary should not be null');
+        Assert.isNotNull(summary.results, 'Results list should not be null');
+        Assert.isTrue(summary.totalTests >= 0, 'Total tests should be non-negative');
+        Assert.isTrue(summary.score >= 0 && summary.score <= 100, 'Score should be between 0 and 100');
+    }
+    
+    @isTest
+    static void testGetAuditSummary_ScoreCalculation() {
+        Test.startTest();
+        FoxSecController.AuditSummary summary = FoxSecController.getAuditSummary();
+        Test.stopTest();
+        
+        // Verify statistics are consistent
+        Integer expectedTotal = summary.criticalCount + summary.warningCount + 
+                               summary.passCount + summary.skippedCount;
+        Assert.areEqual(summary.totalTests, expectedTotal, 
+            'Total should equal sum of all categories');
+        
+        // Verify score formula: 100 - (criticals * 10) - (warnings * 3), min 0
+        Integer expectedScore = Math.max(0, 100 - (summary.criticalCount * 10) - (summary.warningCount * 3));
+        Assert.areEqual(expectedScore, summary.score, 
+            'Score should follow formula: 100 - (criticals * 10) - (warnings * 3)');
+    }
+    
+    @isTest
+    static void testGetAuditSummary_Cacheable() {
+        // First call
+        FoxSecController.AuditSummary summary1 = FoxSecController.getAuditSummary();
+        
+        Test.startTest();
+        // Second call - cacheable should work
+        FoxSecController.AuditSummary summary2 = FoxSecController.getAuditSummary();
+        Test.stopTest();
+        
+        Assert.isNotNull(summary1, 'First summary should not be null');
+        Assert.isNotNull(summary2, 'Second summary should not be null');
+    }
+    
+    @isTest
+    static void testAuditSummary_DefaultConstructor() {
+        Test.startTest();
+        FoxSecController.AuditSummary summary = new FoxSecController.AuditSummary();
+        Test.stopTest();
+        
+        Assert.areEqual(100, summary.score, 'Default score should be 100');
+        Assert.areEqual(0, summary.totalTests, 'Default totalTests should be 0');
+        Assert.areEqual(0, summary.criticalCount, 'Default criticalCount should be 0');
+        Assert.areEqual(0, summary.warningCount, 'Default warningCount should be 0');
+        Assert.areEqual(0, summary.passCount, 'Default passCount should be 0');
+        Assert.areEqual(0, summary.skippedCount, 'Default skippedCount should be 0');
+        Assert.isNotNull(summary.results, 'Results list should be initialized');
+    }
+    
+    // ─────────────────────────────────────────────────────────────────────────────
+    // runAllAudits Tests
+    // ─────────────────────────────────────────────────────────────────────────────
+    
     @isTest
     static void testRunAllAudits_ReturnsResults() {
         Test.startTest();
