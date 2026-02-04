@@ -40,10 +40,22 @@
 /* Score display in center of gauge */
 .gauge-score {
     position: absolute;
-    top: 55%;
+    top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
+}
+
+/* Score display ABOVE the arc */
+.gauge-score-above {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+/* Score display BELOW the arc (not overlapping) */
+.gauge-score-below {
+    text-align: center;
+    margin-top: 0.5rem;
 }
 
 .gauge-score-value {
@@ -148,9 +160,14 @@
    ───────────────────────────────────────────────────────────────────────────── */
 
 .badge-critical {
-    background-color: #c23934;
-    color: #fff;
+    background-color: #c23934 !important;
+    color: #fff !important;
     font-weight: 600;
+}
+
+.badge-critical:hover {
+    background-color: #a31f1a !important;
+    color: #fff !important;
 }
 
 .badge-warning {
@@ -159,15 +176,46 @@
     font-weight: 600;
 }
 
+.badge-warning:hover {
+    background-color: #e68836;
+}
+
 .badge-pass {
     background-color: #04844b;
     color: #fff;
     font-weight: 600;
 }
 
+.badge-pass:hover {
+    background-color: #036d3d;
+    color: #fff;
+}
+
 .badge-info {
     background-color: #706e6b;
     color: #fff;
+}
+
+.badge-info:hover {
+    background-color: #5a5856;
+    color: #fff;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DataTable Cell Alignment (Impact column badges centered)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+:host lightning-datatable .slds-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Action button column styles */
+.action-button-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────

@@ -30,10 +30,16 @@
                             <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3">
                                 <div class="gauge-container slds-align_absolute-center">
                                     <div class="gauge-wrapper">
-                                        <svg viewBox="0 0 200 120" class="gauge-svg">
+                                        <!-- Score Display ABOVE the arc -->
+                                        <div class="gauge-score-above">
+                                            <span class={scoreTextClass}>{score}</span>
+                                            <span class="gauge-label">Security Score</span>
+                                        </div>
+                                        <!-- SVG Arc below the score -->
+                                        <svg viewBox="0 0 200 100" class="gauge-svg">
                                             <!-- Background arc -->
                                             <path 
-                                                d="M 20 100 A 80 80 0 0 1 180 100" 
+                                                d="M 20 10 A 80 80 0 0 0 180 10" 
                                                 fill="none" 
                                                 stroke="#e0e5ee" 
                                                 stroke-width="16"
@@ -41,7 +47,7 @@
                                             </path>
                                             <!-- Score arc -->
                                             <path 
-                                                d="M 20 100 A 80 80 0 0 1 180 100" 
+                                                d="M 20 10 A 80 80 0 0 0 180 10" 
                                                 fill="none" 
                                                 class={gaugeColorClass}
                                                 stroke-width="16"
@@ -50,10 +56,6 @@
                                                 stroke-dashoffset={gaugeDashOffset}>
                                             </path>
                                         </svg>
-                                        <div class="gauge-score">
-                                            <span class={scoreTextClass}>{score}</span>
-                                            <span class="gauge-label">Security Score</span>
-                                        </div>
                                     </div>
                                     <!-- Grade Badge -->
                                     <div class="grade-badge-container slds-m-top_small">
@@ -112,7 +114,7 @@
                     <!-- Results Data Table -->
                     <div class="slds-p-around_medium">
                         <h2 class="slds-text-heading_small slds-m-bottom_medium">Audit Results</h2>
-                        <lightning-datatable
+                        <c-fox-sec-datatable
                             key-field="id"
                             data={tableData}
                             columns={columns}
@@ -120,8 +122,9 @@
                             show-row-number-column
                             sorted-by={sortedBy}
                             sorted-direction={sortedDirection}
-                            onsort={handleSort}>
-                        </lightning-datatable>
+                            onsort={handleSort}
+                            onrowaction={handleRowAction}>
+                        </c-fox-sec-datatable>
                     </div>
                 </lightning-tab>
 

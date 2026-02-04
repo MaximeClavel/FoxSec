@@ -72,16 +72,16 @@ export default class FoxSecDashboard extends LightningElement {
             type: 'text',
             sortable: true,
             wrapText: true,
-            initialWidth: 280
+            initialWidth: 250
         },
         {
             label: 'Impact',
             fieldName: 'status',
-            type: 'text',
+            type: 'impactBadge',
             sortable: true,
-            initialWidth: 120,
+            initialWidth: 110,
             cellAttributes: {
-                class: { fieldName: 'statusClass' }
+                alignment: 'center'
             }
         },
         {
@@ -96,7 +96,23 @@ export default class FoxSecDashboard extends LightningElement {
             fieldName: 'remediationSteps',
             type: 'text',
             wrapText: true,
-            initialWidth: 350
+            initialWidth: 300
+        },
+        {
+            label: 'Action',
+            type: 'button',
+            initialWidth: 120,
+            typeAttributes: {
+                label: 'Go to Setup',
+                name: 'navigate_setup',
+                variant: 'base',
+                iconName: 'utility:new_window',
+                iconPosition: 'right',
+                disabled: { fieldName: 'hasNoSetupLink' }
+            },
+            cellAttributes: {
+                alignment: 'center'
+            }
         }
     ];
 
@@ -204,15 +220,20 @@ export default class FoxSecDashboard extends LightningElement {
         this.totalTests = data.totalTests;
 
         // Transform results for datatable with unique IDs and status styling
-        this.tableData = data.results.map((result, index) => ({
-            id: `result-${index}`,
-            testName: result.testName || 'Unknown Test',
-            status: result.status || STATUS_INFO,
-            message: result.message || '',
-            remediationSteps: result.remediationSteps || '-',
-            statusClass: this.getStatusClass(result.status),
-            sortOrder: this.getStatusSortOrder(result.status)
-        }));
+        this.tableData = data.results.map((result, index) => {
+            const setupPath = this.extractSetupPath(result.remediationSteps);
+            return {
+                id: `result-${index}`,
+                testName: result.testName || 'Unknown Test',
+                status: result.status || STATUS_INFO,
+                message: result.message || '',
+                remediationSteps: result.remediationSteps || '-',
+                statusClass: this.getStatusClass(result.status),
+                sortOrder: this.getStatusSortOrder(result.status),
+                setupUrl: setupPath ? this.buildSetupUrl(setupPath) : null,
+                hasNoSetupLink: !setupPath
+            };
+        });
 
         // Apply default sort
         this.sortData(this.sortedBy, this.sortedDirection);
@@ -287,6 +308,117 @@ export default class FoxSecDashboard extends LightningElement {
             default:
                 return 6;
         }
+    }
+
+    /**
+     * @description Extract Setup path from remediation steps text
+     * Looks for patterns like "Setup > Security > Remote Site Settings"
+     * @param {String} remediationSteps - The remediation steps text
+     * @returns {String|null} The extracted Setup path or null if not found
+     */
+    extractSetupPath(remediationSteps) {
+        if (!remediationSteps) return null;
+        
+        // Match pattern: "Setup > Something > Something Else" or "Setup > Something"
+        const setupRegex = /Setup\s*>\s*([^.]+)/i;
+        const match = remediationSteps.match(setupRegex);
+        
+        if (match && match[0]) {
+            // Clean up the path - remove trailing periods, commas, etc.
+            return match[0].replace(/[.,;:]+$/, '').trim();
+        }
+        return null;
+    }
+
+    /**
+     * @description Build Salesforce Setup URL from a Setup path
+     * Maps common Setup paths to their Lightning Setup URLs
+     * @param {String} setupPath - Path like "Setup > Users > Permission Sets"
+     * @returns {String} The Setup URL
+     */
+    buildSetupUrl(setupPath) {
+        // Mapping of Setup paths to Lightning Setup URLs
+        const setupUrlMap = {
+            // Security
+            'remote site settings': '/lightning/setup/SecurityRemoteProxy/home',
+            'session settings': '/lightning/setup/SecuritySession/home',
+            'sharing settings': '/lightning/setup/SecuritySharing/home',
+            'password policies': '/lightning/setup/SecurityPolicies/home',
+            'certificate and key management': '/lightning/setup/CertificatesAndKeysManagement/home',
+            'named credentials': '/lightning/setup/NamedCredential/home',
+            'auth. providers': '/lightning/setup/AuthProvidersExt/home',
+            'auth providers': '/lightning/setup/AuthProvidersExt/home',
+            'connected apps': '/lightning/setup/ConnectedApplication/home',
+            'login flows': '/lightning/setup/LoginFlow/home',
+            'identity provider': '/lightning/setup/IdpPage/home',
+            
+            // Users & Permissions
+            'users': '/lightning/setup/ManageUsers/home',
+            'permission sets': '/lightning/setup/PermSets/home',
+            'permission set groups': '/lightning/setup/PermSetGroups/home',
+            'profiles': '/lightning/setup/EnhancedProfiles/home',
+            'roles': '/lightning/setup/Roles/home',
+            'public groups': '/lightning/setup/PublicGroups/home',
+            'queues': '/lightning/setup/Queues/home',
+            
+            // Objects & Fields
+            'object manager': '/lightning/setup/ObjectManager/home',
+            'field accessibility': '/lightning/setup/FieldAccessibility/home',
+            
+            // Process Automation
+            'flows': '/lightning/setup/Flows/home',
+            'process builder': '/lightning/setup/ProcessAutomation/home',
+            'workflow rules': '/lightning/setup/WorkflowRules/home',
+            'approval processes': '/lightning/setup/ApprovalProcesses/home',
+            
+            // Data
+            'storage usage': '/lightning/setup/CompanyResourceDisk/home',
+            'data export': '/lightning/setup/DataManagementExport/home',
+            'mass delete records': '/lightning/setup/DataManagementMassDelete/home',
+            
+            // Email
+            'deliverability': '/lightning/setup/OrgEmailSettings/home',
+            'email security': '/lightning/setup/EmailSecurityCompliance/home',
+            
+            // Monitoring
+            'login history': '/lightning/setup/LoginHistory/home',
+            'setup audit trail': '/lightning/setup/SecurityEvents/home',
+            'debug logs': '/lightning/setup/ApexDebugLogs/home',
+            'scheduled jobs': '/lightning/setup/ScheduledJobs/home',
+            
+            // Development
+            'apex classes': '/lightning/setup/ApexClasses/home',
+            'apex triggers': '/lightning/setup/ApexTriggers/home',
+            'visualforce pages': '/lightning/setup/ApexPages/home',
+            'lightning components': '/lightning/setup/LightningComponentBundles/home',
+            'custom settings': '/lightning/setup/CustomSettings/home',
+            'custom metadata types': '/lightning/setup/CustomMetadata/home'
+        };
+        
+        // Extract the last part of the path for mapping
+        const pathParts = setupPath.toLowerCase().replace(/setup\s*>\s*/i, '').split('>');
+        const lastPart = pathParts[pathParts.length - 1].trim();
+        const secondLastPart = pathParts.length > 1 ? pathParts[pathParts.length - 2].trim() : '';
+        
+        // Try to find a matching URL
+        // First try the full remaining path
+        const fullPath = pathParts.join(' > ').trim();
+        if (setupUrlMap[fullPath]) {
+            return setupUrlMap[fullPath];
+        }
+        
+        // Then try just the last part
+        if (setupUrlMap[lastPart]) {
+            return setupUrlMap[lastPart];
+        }
+        
+        // Try second-to-last part (for cases like "Users > John Doe")
+        if (setupUrlMap[secondLastPart]) {
+            return setupUrlMap[secondLastPart];
+        }
+        
+        // Default: return generic Setup home
+        return '/lightning/setup/SetupOneHome/home';
     }
 
     /**
@@ -522,6 +654,20 @@ export default class FoxSecDashboard extends LightningElement {
         this.sortedBy = fieldName;
         this.sortedDirection = sortDirection;
         this.sortData(fieldName, sortDirection);
+    }
+
+    /**
+     * @description Handle row action (Navigate to Setup) from datatable
+     * @param {Event} event - Row action event from datatable
+     */
+    handleRowAction(event) {
+        const action = event.detail.action;
+        const row = event.detail.row;
+        
+        if (action.name === 'navigate_setup' && row.setupUrl) {
+            // Open Setup URL in new tab
+            window.open(row.setupUrl, '_blank');
+        }
     }
 
     /**

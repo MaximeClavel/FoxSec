@@ -1,0 +1,60 @@
+/* File: force-app/main/default/lwc/impactBadge/impactBadge.css */
+
+.badge-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.impact-badge {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025rem;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+.impact-critical {
+    background-color: #c23934;
+    color: #ffffff;
+}
+
+.impact-critical:hover {
+    background-color: #a31a15;
+    color: #ffffff;
+}
+
+.impact-warning {
+    background-color: #ff9a3c;
+    color: #080707;
+}
+
+.impact-warning:hover {
+    background-color: #e68633;
+}
+
+.impact-pass {
+    background-color: #04844b;
+    color: #ffffff;
+}
+
+.impact-pass:hover {
+    background-color: #036b3d;
+    color: #ffffff;
+}
+
+.impact-info {
+    background-color: #706e6b;
+    color: #ffffff;
+}
+
+.impact-info:hover {
+    background-color: #5a5856;
+    color: #ffffff;
+}
