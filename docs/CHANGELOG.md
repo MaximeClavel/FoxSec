@@ -13,6 +13,117 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PermissionAuditEngine: Sensitive permissions audit
 - FlowAuditEngine: Flow security audit
 - Remediation Flow: Automated corrective actions
+- Multi-Org Dashboard: Aggregate scores from multiple orgs
+
+---
+
+## [2.0.1] - 2026-02-04
+
+### Fixed
+
+#### LWC Dashboard Bugs
+- **Tab Persistence**: Fixed issue where running a compliance assessment would reset the view to Overview tab instead of staying on Compliance tab
+  - Added `isInitialLoading` state to distinguish initial load from action loading
+  - Added `onactive` handler on `lightning-tabset` to track active tab
+  - Spinner now displays as overlay during actions without destroying the DOM
+
+- **Refresh Button**: Fixed infinite spinner when clicking Refresh button
+  - `handleRefresh()` now properly awaits `refreshApex()` promises with `Promise.all()`
+  - Added `finally` block to ensure `isLoading` is reset
+
+- **Export Menu Position**: Fixed export dropdown menu appearing outside viewport
+  - Added `menu-alignment="right"` to `lightning-button-menu`
+
+- **CSV/Excel Export**: Fixed "Lightning Web Security: Unsupported MIME type" error
+  - Replaced `Blob` + `URL.createObjectURL()` with base64 data URI for LWS compatibility
+  - Download now uses `data:mime/type;base64,content` format
+
+### Added
+
+- **FoxSecController.exportAuditToExcel()**: New `@AuraEnabled` method for Excel export
+  - Previously Excel export was incorrectly calling CSV export method
+  - Now properly calls `AuditExportService.exportToExcel()`
+
+### Changed
+
+- **Custom Object Fields**: All fields on `FoxSec_Audit_Snapshot__c` set to `required=false`
+  - Fixed deployment errors: "You cannot deploy to a required field"
+  - Affected fields: `Health_Score__c`, `Snapshot_Date__c`
+
+---
+
+## [2.0.0] - 2026-02-04
+
+### Added - Phase 2: Security Compliance Suite
+
+#### New Apex Classes
+
+- **HealthScoreCalculator** (`force-app/main/default/classes/core/HealthScoreCalculator.cls`)
+  - Security health score calculation (0-100) with severity weighting
+  - Grade system: A (90-100), B (75-89), C (60-74), D (40-59), F (0-39)
+  - Deduction caps per severity to prevent score collapse
+  - Inner classes: `HealthScoreResult`, `GradeInfo`
+
+- **ComplianceTemplateService** (`force-app/main/default/classes/compliance/ComplianceTemplateService.cls`)
+  - Pre-built compliance frameworks: SOC2 (9 controls), GDPR (7), HIPAA (7), ISO27001 (8)
+  - Maps FoxSec tests to regulatory controls
+  - Compliance assessment with pass/partial/fail status per control
+  - Inner classes: `ComplianceControl`, `ComplianceAssessment`, `ComplianceTemplateInfo`
+
+- **AuditSnapshotService** (`force-app/main/default/classes/services/AuditSnapshotService.cls`)
+  - Audit snapshot persistence to custom object
+  - Trend analysis over configurable time periods
+  - Snapshot comparison (baseline vs current)
+  - Automatic cleanup of old snapshots
+  - Inner classes: `TrendDataPoint`, `TrendAnalysis`
+
+- **AuditExportService** (`force-app/main/default/classes/services/AuditExportService.cls`)
+  - CSV export for audit results and summaries
+  - Excel XML (SpreadsheetML) export
+  - Trend data export for external reporting
+  - Inner classes: `ExportOptions`, `ExportResult`
+
+#### New Custom Object
+
+- **FoxSec_Audit_Snapshot__c** (`force-app/main/default/objects/FoxSec_Audit_Snapshot__c/`)
+  - 14 custom fields for historical audit data
+  - Fields: Snapshot_Date__c, Health_Score__c, Grade__c, Critical_Count__c, High_Count__c, Medium_Count__c, Low_Count__c, Pass_Count__c, Total_Tests__c, Org_Id__c, Audit_Details__c (JSON), Compliance_Template__c, Compliance_Score__c, Run_By__c
+
+#### Updated LWC Dashboard
+
+- **foxSecDashboard** - Complete UI overhaul
+  - 3-tab interface: Overview, Compliance, Trends
+  - Grade badge display with color coding
+  - Compliance assessment UI with template selector
+  - Trend visualization (bar chart)
+  - Export button menu (CSV/Excel)
+  - Snapshot save functionality
+
+#### Updated Controller Methods
+
+- **FoxSecController** - 9 new `@AuraEnabled` methods:
+  - `getComplianceTemplates()` - List available compliance templates
+  - `runComplianceAssessment(templateName)` - Execute compliance assessment
+  - `saveAuditSnapshot(complianceTemplate, complianceScore)` - Persist audit state
+  - `getTrendAnalysis(numberOfMonths)` - Retrieve trend data
+  - `getLatestSnapshot()` - Get most recent snapshot
+  - `exportAuditToCSV()` - Export current audit to CSV
+  - `exportAuditToExcel()` - Export current audit to Excel XML
+  - `exportTrendDataToCSV(numberOfMonths)` - Export trend data to CSV
+  - `compareSnapshots(snapshot1Id, snapshot2Id)` - Compare two snapshots
+
+#### Updated Permission Set
+
+- **FoxSec_Admin.permissionset-meta.xml**
+  - Added Apex class access: HealthScoreCalculator, ComplianceTemplateService, AuditSnapshotService, AuditExportService
+  - Added object permissions: FoxSec_Audit_Snapshot__c (CRUD + ViewAll)
+  - Added field permissions for all 14 snapshot fields
+
+### Security
+- All new classes use `with sharing` enforcement
+- CRUD/FLS checks via `Security.stripInaccessible` and `WITH USER_MODE`
+- Export service handles special characters (CSV injection prevention)
+- No external callouts for data exfiltration prevention
 
 ---
 

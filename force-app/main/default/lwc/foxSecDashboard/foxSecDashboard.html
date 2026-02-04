@@ -1,8 +1,8 @@
 <!-- File: force-app/main/default/lwc/foxSecDashboard/foxSecDashboard.html -->
 <template>
     <lightning-card title="FoxSec Security Dashboard" icon-name="custom:custom55">
-        <!-- Loading Spinner -->
-        <template lwc:if={isLoading}>
+        <!-- Loading Spinner (Initial Load Only) -->
+        <template lwc:if={isInitialLoading}>
             <div class="slds-align_absolute-center slds-m-around_large">
                 <lightning-spinner alternative-text="Loading audit results..." size="medium"></lightning-spinner>
             </div>
@@ -19,102 +19,302 @@
 
         <!-- Dashboard Content -->
         <template lwc:if={hasData}>
-            <!-- Score Gauge Section -->
-            <div class="slds-p-around_medium">
-                <div class="slds-grid slds-gutters slds-wrap">
-                    <!-- Gauge Chart -->
-                    <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3">
-                        <div class="gauge-container slds-align_absolute-center">
-                            <div class="gauge-wrapper">
-                                <svg viewBox="0 0 200 120" class="gauge-svg">
-                                    <!-- Background arc -->
-                                    <path 
-                                        d="M 20 100 A 80 80 0 0 1 180 100" 
-                                        fill="none" 
-                                        stroke="#e0e5ee" 
-                                        stroke-width="16"
-                                        stroke-linecap="round">
-                                    </path>
-                                    <!-- Score arc -->
-                                    <path 
-                                        d="M 20 100 A 80 80 0 0 1 180 100" 
-                                        fill="none" 
-                                        class={gaugeColorClass}
-                                        stroke-width="16"
-                                        stroke-linecap="round"
-                                        stroke-dasharray={gaugeDashArray}
-                                        stroke-dashoffset={gaugeDashOffset}>
-                                    </path>
-                                </svg>
-                                <div class="gauge-score">
-                                    <span class={scoreTextClass}>{score}</span>
-                                    <span class="gauge-label">Security Score</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Statistics Cards -->
-                    <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+            <!-- Tab Navigation for Phase 2 -->
+            <lightning-tabset active-tab-value={activeTab} variant="scoped" onactive={handleTabChange}>
+                <!-- Overview Tab -->
+                <lightning-tab label="Overview" value="overview" icon-name="utility:chart">
+                    <!-- Score Gauge Section -->
+                    <div class="slds-p-around_medium">
                         <div class="slds-grid slds-gutters slds-wrap">
-                            <!-- Critical Issues -->
-                            <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-around_x-small">
-                                <div class="stat-card stat-card-critical">
-                                    <div class="stat-value">{criticalCount}</div>
-                                    <div class="stat-label">Critical</div>
+                            <!-- Gauge Chart with Grade -->
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3">
+                                <div class="gauge-container slds-align_absolute-center">
+                                    <div class="gauge-wrapper">
+                                        <svg viewBox="0 0 200 120" class="gauge-svg">
+                                            <!-- Background arc -->
+                                            <path 
+                                                d="M 20 100 A 80 80 0 0 1 180 100" 
+                                                fill="none" 
+                                                stroke="#e0e5ee" 
+                                                stroke-width="16"
+                                                stroke-linecap="round">
+                                            </path>
+                                            <!-- Score arc -->
+                                            <path 
+                                                d="M 20 100 A 80 80 0 0 1 180 100" 
+                                                fill="none" 
+                                                class={gaugeColorClass}
+                                                stroke-width="16"
+                                                stroke-linecap="round"
+                                                stroke-dasharray={gaugeDashArray}
+                                                stroke-dashoffset={gaugeDashOffset}>
+                                            </path>
+                                        </svg>
+                                        <div class="gauge-score">
+                                            <span class={scoreTextClass}>{score}</span>
+                                            <span class="gauge-label">Security Score</span>
+                                        </div>
+                                    </div>
+                                    <!-- Grade Badge -->
+                                    <div class="grade-badge-container slds-m-top_small">
+                                        <span class={gradeBadgeClass}>Grade {grade}</span>
+                                        <p class="slds-text-body_small slds-m-top_x-small">{gradeLabel}</p>
+                                    </div>
                                 </div>
                             </div>
-                            <!-- Warnings -->
-                            <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-around_x-small">
-                                <div class="stat-card stat-card-warning">
-                                    <div class="stat-value">{warningCount}</div>
-                                    <div class="stat-label">Warnings</div>
+
+                            <!-- Statistics Cards -->
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                <div class="slds-grid slds-gutters slds-wrap">
+                                    <!-- Critical Issues -->
+                                    <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-around_x-small">
+                                        <div class="stat-card stat-card-critical">
+                                            <div class="stat-value">{criticalCount}</div>
+                                            <div class="stat-label">Critical</div>
+                                        </div>
+                                    </div>
+                                    <!-- Warnings -->
+                                    <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-around_x-small">
+                                        <div class="stat-card stat-card-warning">
+                                            <div class="stat-value">{warningCount}</div>
+                                            <div class="stat-label">Warnings</div>
+                                        </div>
+                                    </div>
+                                    <!-- Passed -->
+                                    <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-around_x-small">
+                                        <div class="stat-card stat-card-pass">
+                                            <div class="stat-value">{passCount}</div>
+                                            <div class="stat-label">Passed</div>
+                                        </div>
+                                    </div>
+                                    <!-- Total -->
+                                    <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-around_x-small">
+                                        <div class="stat-card stat-card-total">
+                                            <div class="stat-value">{totalTests}</div>
+                                            <div class="stat-label">Total Tests</div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <!-- Passed -->
-                            <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-around_x-small">
-                                <div class="stat-card stat-card-pass">
-                                    <div class="stat-value">{passCount}</div>
-                                    <div class="stat-label">Passed</div>
-                                </div>
-                            </div>
-                            <!-- Total -->
-                            <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-around_x-small">
-                                <div class="stat-card stat-card-total">
-                                    <div class="stat-value">{totalTests}</div>
-                                    <div class="stat-label">Total Tests</div>
-                                </div>
+                                
+                                <!-- Trend Indicator -->
+                                <template lwc:if={hasTrendData}>
+                                    <div class="trend-indicator slds-m-top_medium slds-p-around_small">
+                                        <lightning-icon icon-name={trendIcon} size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                        <span class={trendTextClass}>{trendText}</span>
+                                    </div>
+                                </template>
                             </div>
                         </div>
                     </div>
+
+                    <div class="slds-border_top"></div>
+
+                    <!-- Results Data Table -->
+                    <div class="slds-p-around_medium">
+                        <h2 class="slds-text-heading_small slds-m-bottom_medium">Audit Results</h2>
+                        <lightning-datatable
+                            key-field="id"
+                            data={tableData}
+                            columns={columns}
+                            hide-checkbox-column
+                            show-row-number-column
+                            sorted-by={sortedBy}
+                            sorted-direction={sortedDirection}
+                            onsort={handleSort}>
+                        </lightning-datatable>
+                    </div>
+                </lightning-tab>
+
+                <!-- Compliance Tab -->
+                <lightning-tab label="Compliance" value="compliance" icon-name="utility:shield">
+                    <div class="slds-p-around_medium">
+                        <!-- Template Selector -->
+                        <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_medium">
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-combobox
+                                    name="complianceTemplate"
+                                    label="Compliance Framework"
+                                    value={selectedTemplate}
+                                    placeholder="Select a compliance template"
+                                    options={complianceTemplateOptions}
+                                    onchange={handleTemplateChange}>
+                                </lightning-combobox>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-grid slds-grid_vertical-align-end">
+                                <lightning-button
+                                    label="Run Assessment"
+                                    variant="brand"
+                                    icon-name="utility:check"
+                                    onclick={handleRunAssessment}
+                                    disabled={isAssessmentDisabled}
+                                    class="slds-m-bottom_xx-small">
+                                </lightning-button>
+                            </div>
+                        </div>
+
+                        <!-- Compliance Results -->
+                        <template lwc:if={hasComplianceData}>
+                            <div class="compliance-summary slds-box slds-m-bottom_medium">
+                                <div class="slds-grid slds-gutters slds-wrap">
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-text-align_center">
+                                        <div class="compliance-score-display">
+                                            <span class={complianceScoreClass}>{complianceScoreDisplay}</span>
+                                            <span class="slds-text-body_small slds-d-block">Compliance Score</span>
+                                        </div>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3">
+                                        <div class="slds-grid slds-wrap slds-p-around_small">
+                                            <div class="slds-col slds-size_1-of-2">
+                                                <p><strong>Total Controls:</strong> {complianceTotalControls}</p>
+                                                <p><strong>Passed:</strong> <span class="slds-text-color_success">{compliancePassedControls}</span></p>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-2">
+                                                <p><strong>Failed:</strong> <span class="slds-text-color_error">{complianceFailedControls}</span></p>
+                                                <p><strong>N/A:</strong> {complianceNAControls}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Compliance Controls Table -->
+                            <lightning-datatable
+                                key-field="controlId"
+                                data={complianceControlsData}
+                                columns={complianceColumns}
+                                hide-checkbox-column>
+                            </lightning-datatable>
+                        </template>
+
+                        <template lwc:if={showComplianceEmpty}>
+                            <div class="slds-align_absolute-center slds-p-around_large empty-state">
+                                <div class="slds-text-align_center">
+                                    <lightning-icon icon-name="utility:shield" size="large" class="slds-m-bottom_medium"></lightning-icon>
+                                    <h3 class="slds-text-heading_medium">Select a Compliance Framework</h3>
+                                    <p class="slds-text-body_regular slds-m-top_small">
+                                        Choose SOC2, GDPR, HIPAA, or ISO27001 to assess your org.
+                                    </p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </lightning-tab>
+
+                <!-- Trends Tab -->
+                <lightning-tab label="Trends" value="trends" icon-name="utility:trending">
+                    <div class="slds-p-around_medium">
+                        <!-- Time Range Selector -->
+                        <div class="slds-grid slds-gutters slds-m-bottom_medium">
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                                <lightning-combobox
+                                    name="trendRange"
+                                    label="Time Range"
+                                    value={selectedTrendDays}
+                                    options={trendRangeOptions}
+                                    onchange={handleTrendRangeChange}>
+                                </lightning-combobox>
+                            </div>
+                        </div>
+
+                        <!-- Trend Statistics -->
+                        <template lwc:if={hasTrendData}>
+                            <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_medium">
+                                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-around_x-small">
+                                    <div class="stat-card stat-card-total">
+                                        <div class="stat-value">{trendCurrentScore}</div>
+                                        <div class="stat-label">Current Score</div>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-around_x-small">
+                                    <div class="stat-card stat-card-pass">
+                                        <div class="stat-value">{trendAverageScore}</div>
+                                        <div class="stat-label">Average Score</div>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-around_x-small">
+                                    <div class="stat-card">
+                                        <div class="stat-value">{trendHighestScore}</div>
+                                        <div class="stat-label">Highest Score</div>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-around_x-small">
+                                    <div class="stat-card">
+                                        <div class="stat-value">{trendSnapshotCount}</div>
+                                        <div class="stat-label">Snapshots</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Simple Trend Chart -->
+                            <div class="trend-chart-container slds-box slds-m-bottom_medium">
+                                <h3 class="slds-text-heading_small slds-m-bottom_small">Score History</h3>
+                                <div class="trend-chart">
+                                    <template for:each={trendDataPoints} for:item="point">
+                                        <div key={point.dateLabel} class="trend-bar-wrapper">
+                                            <div class="trend-bar" style={point.barStyle}></div>
+                                            <span class="trend-bar-label">{point.dateLabel}</span>
+                                            <span class="trend-bar-value">{point.healthScore}</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template lwc:if={showTrendEmpty}>
+                            <div class="slds-align_absolute-center slds-p-around_large empty-state">
+                                <div class="slds-text-align_center">
+                                    <lightning-icon icon-name="utility:trending" size="large" class="slds-m-bottom_medium"></lightning-icon>
+                                    <h3 class="slds-text-heading_medium">No Trend Data Available</h3>
+                                    <p class="slds-text-body_regular slds-m-top_small">
+                                        Save snapshots regularly to track your security posture over time.
+                                    </p>
+                                    <lightning-button
+                                        label="Save First Snapshot"
+                                        variant="brand"
+                                        icon-name="utility:save"
+                                        onclick={handleSaveSnapshot}
+                                        class="slds-m-top_medium">
+                                    </lightning-button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </lightning-tab>
+            </lightning-tabset>
+
+            <!-- Spinner Overlay for Actions (Assessment, Snapshot, Export) -->
+            <template lwc:if={showSpinnerOverlay}>
+                <div class="spinner-overlay">
+                    <lightning-spinner alternative-text="Processing..." size="medium"></lightning-spinner>
                 </div>
-            </div>
+            </template>
 
-            <div class="slds-border_top"></div>
-
-            <!-- Results Data Table -->
-            <div class="slds-p-around_medium">
-                <h2 class="slds-text-heading_small slds-m-bottom_medium">Audit Results</h2>
-                <lightning-datatable
-                    key-field="id"
-                    data={tableData}
-                    columns={columns}
-                    hide-checkbox-column
-                    show-row-number-column
-                    sorted-by={sortedBy}
-                    sorted-direction={sortedDirection}
-                    onsort={handleSort}>
-                </lightning-datatable>
-            </div>
-
-            <!-- Refresh Button -->
+            <!-- Action Buttons -->
             <div slot="actions">
-                <lightning-button 
-                    label="Refresh Audit" 
-                    icon-name="utility:refresh"
-                    onclick={handleRefresh}
-                    disabled={isLoading}>
-                </lightning-button>
+                <lightning-button-group>
+                    <lightning-button 
+                        label="Refresh" 
+                        icon-name="utility:refresh"
+                        onclick={handleRefresh}
+                        disabled={isLoading}>
+                    </lightning-button>
+                    <lightning-button 
+                        label="Save Snapshot" 
+                        icon-name="utility:save"
+                        onclick={handleSaveSnapshot}
+                        disabled={isLoading}>
+                    </lightning-button>
+                    <lightning-button-menu
+                        alternative-text="Export Options"
+                        icon-name="utility:download"
+                        menu-alignment="right"
+                        onselect={handleExportSelect}
+                        disabled={isLoading}>
+                        <lightning-menu-item value="csv" label="Export to CSV"></lightning-menu-item>
+                        <lightning-menu-item value="excel" label="Export to Excel"></lightning-menu-item>
+                        <lightning-menu-item value="trend" label="Export Trend Data"></lightning-menu-item>
+                    </lightning-button-menu>
+                </lightning-button-group>
             </div>
         </template>
     </lightning-card>

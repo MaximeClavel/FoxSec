@@ -1,30 +1,48 @@
 # FoxSec - Product Roadmap
 
-## 📊 Current State (v1.x)
+## 📊 Current State (v2.0)
 
 | Module | Implemented Tests | Status |
 |--------|-------------------|--------|
 | **ConfigAuditEngine** | Remote Sites, CSP, Certificates, Sessions | ✅ v1.0 |
 | **UserAuditEngine** | Shadow Admins, API Users, Guest Users, Passwords | ✅ v1.1 |
 | **SharingAuditEngine** | OWD (Account/Contact/Case), External Sharing, Public Files | ✅ v1.0 |
+| **HealthScoreCalculator** | Security score 0-100, grades A-F, deduction caps | ✅ v2.0 |
+| **ComplianceTemplateService** | SOC2, GDPR, HIPAA, ISO27001 control mappings | ✅ v2.0 |
+| **AuditSnapshotService** | Snapshot persistence, trend analysis, comparison | ✅ v2.0 |
+| **AuditExportService** | CSV/Excel export for external audits | ✅ v2.0 |
 
 ---
 
 ## 🎯 Feature Phases
 
-### **Phase 2: Security Compliance Suite** (Inspired by Security Center)
+### **Phase 2: Security Compliance Suite** ✅ IMPLEMENTED (Inspired by Security Center)
 
-**Target**: Q1 2026  
+**Completed**: v2.0  
 **Theme**: Visibility & Compliance
 
-| Feature | Description | Priority | Complexity |
-|---------|-------------|----------|------------|
-| **Security Health Score** | Global score 0-100 with severity weighting | 🔴 High | Medium |
-| **Baseline Comparison** | Compare current config vs defined "gold standard" | 🔴 High | Medium |
-| **Multi-Org Dashboard** | Aggregate scores from multiple orgs (sandbox/prod) | 🟡 Medium | High |
-| **Compliance Templates** | SOC2, HIPAA, GDPR, ISO27001 templates with mapped controls | 🔴 High | Medium |
-| **Trend Analysis** | Score evolution over time (custom object storage) | 🟡 Medium | Low |
-| **PDF/Excel Export** | Export reports for external audits | 🔴 High | Low |
+| Feature | Description | Priority | Complexity | Status |
+|---------|-------------|----------|------------|--------|
+| **Security Health Score** | Global score 0-100 with severity weighting | 🔴 High | Medium | ✅ Done |
+| **Baseline Comparison** | Compare current config vs defined "gold standard" | 🔴 High | Medium | ✅ Done |
+| **Multi-Org Dashboard** | Aggregate scores from multiple orgs (sandbox/prod) | 🟡 Medium | High | 🔜 Future |
+| **Compliance Templates** | SOC2, HIPAA, GDPR, ISO27001 templates with mapped controls | 🔴 High | Medium | ✅ Done |
+| **Trend Analysis** | Score evolution over time (custom object storage) | 🟡 Medium | Low | ✅ Done |
+| **PDF/Excel Export** | Export reports for external audits | 🔴 High | Low | ✅ Done (CSV/Excel) |
+
+#### Implementation Details (v2.0)
+
+**New Apex Classes**:
+- `HealthScoreCalculator.cls` - Score calculation with severity weighting and grade system
+- `ComplianceTemplateService.cls` - 4 compliance frameworks (SOC2, GDPR, HIPAA, ISO27001)
+- `AuditSnapshotService.cls` - Snapshot CRUD, trend analysis, snapshot comparison
+- `AuditExportService.cls` - CSV and Excel export functionality
+
+**New Custom Object**:
+- `FoxSec_Audit_Snapshot__c` - 14 fields for historical audit data
+
+**Updated LWC**:
+- `foxSecDashboard` - 3-tab interface (Overview, Compliance, Trends)
 
 #### 2.1 - Security Health Score (Detailed)
 

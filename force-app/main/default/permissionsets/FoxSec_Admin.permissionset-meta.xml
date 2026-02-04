@@ -27,6 +27,106 @@
         <apexClass>FoxSecResult</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <!-- Phase 2 Classes -->
+    <classAccesses>
+        <apexClass>HealthScoreCalculator</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ComplianceTemplateService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>AuditSnapshotService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>AuditExportService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+
+    <!-- Custom Object Permissions - FoxSec_Audit_Snapshot__c -->
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>true</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>FoxSec_Audit_Snapshot__c</object>
+        <viewAllRecords>true</viewAllRecords>
+    </objectPermissions>
+
+    <!-- Field Permissions - FoxSec_Audit_Snapshot__c -->
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FoxSec_Audit_Snapshot__c.Snapshot_Date__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FoxSec_Audit_Snapshot__c.Health_Score__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FoxSec_Audit_Snapshot__c.Grade__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FoxSec_Audit_Snapshot__c.Critical_Count__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FoxSec_Audit_Snapshot__c.High_Count__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FoxSec_Audit_Snapshot__c.Medium_Count__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FoxSec_Audit_Snapshot__c.Low_Count__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FoxSec_Audit_Snapshot__c.Pass_Count__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FoxSec_Audit_Snapshot__c.Total_Tests__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FoxSec_Audit_Snapshot__c.Org_Id__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FoxSec_Audit_Snapshot__c.Audit_Details__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FoxSec_Audit_Snapshot__c.Compliance_Template__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FoxSec_Audit_Snapshot__c.Compliance_Score__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>FoxSec_Audit_Snapshot__c.Run_By__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
 
     <!-- Tab Visibility -->
     <tabSettings>
