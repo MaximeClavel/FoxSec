@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Run_By__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>User who triggered this audit snapshot.</description>
+    <externalId>false</externalId>
+    <label>Run By</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>FoxSec Audit Snapshots</relationshipLabel>
+    <relationshipName>FoxSec_Audit_Snapshots</relationshipName>
+    <required>false</required>
+    <type>Lookup</type>
+</CustomField>

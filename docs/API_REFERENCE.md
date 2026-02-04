@@ -230,6 +230,105 @@ for (FoxSecResult r : summary.results) {
 }
 ```
 
+### Phase 2 Methods (v2.0+)
+
+#### exportAuditToCSV
+
+```apex
+@AuraEnabled
+public static AuditExportService.ExportResult exportAuditToCSV(
+    Boolean includePassedTests, 
+    Boolean includeRemediation,
+    String complianceTemplate
+)
+```
+
+Exports current audit results to CSV format.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `includePassedTests` | `Boolean` | Include PASS results in export |
+| `includeRemediation` | `Boolean` | Include remediation steps column |
+| `complianceTemplate` | `String` | Compliance framework for mapping (optional) |
+
+| Return | Description |
+|--------|-------------|
+| `ExportResult` | Contains CSV content, filename, and MIME type |
+
+#### exportAuditToExcel
+
+```apex
+@AuraEnabled
+public static AuditExportService.ExportResult exportAuditToExcel()
+```
+
+Exports current audit results to Excel XML (SpreadsheetML) format.
+
+| Return | Description |
+|--------|-------------|
+| `ExportResult` | Contains Excel XML content, filename, and MIME type |
+
+#### exportTrendDataToCSV
+
+```apex
+@AuraEnabled
+public static AuditExportService.ExportResult exportTrendDataToCSV(Integer days)
+```
+
+Exports trend data for the specified period to CSV format.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `days` | `Integer` | Number of days of trend data to export (default: 30) |
+
+#### getComplianceTemplates
+
+```apex
+@AuraEnabled(cacheable=true)
+public static List<ComplianceTemplateService.ComplianceTemplateInfo> getComplianceTemplates()
+```
+
+Returns list of available compliance frameworks.
+
+#### runComplianceAssessment
+
+```apex
+@AuraEnabled
+public static ComplianceTemplateService.ComplianceAssessment runComplianceAssessment(String templateName)
+```
+
+Runs compliance assessment against current audit results.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `templateName` | `String` | Framework name: `SOC2`, `GDPR`, `HIPAA`, `ISO27001` |
+
+#### saveAuditSnapshot
+
+```apex
+@AuraEnabled
+public static Id saveAuditSnapshot(String complianceTemplate)
+```
+
+Saves current audit state to `FoxSec_Audit_Snapshot__c`.
+
+| Return | Description |
+|--------|-------------|
+| `Id` | Record ID of created snapshot |
+
+#### getTrendAnalysis
+
+```apex
+@AuraEnabled(cacheable=true)
+public static AuditSnapshotService.TrendAnalysis getTrendAnalysis(Integer days)
+```
+
+Retrieves trend analysis for the specified period.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `days` | `Integer` | Number of days to analyze |
+
 ### Usage Example (LWC)
 
 ```javascript
@@ -460,6 +559,372 @@ public static Map<String, List<FoxSecResult>> groupBySeverity(List<FoxSecResult>
 ```apex
 // Convert to JSON for export
 String jsonResults = JSON.serializePretty(results);
+```
+
+---
+
+## Phase 2 Classes (v2.0)
+
+---
+
+## HealthScoreCalculator
+
+**Type**: `public with sharing class`  
+**Package**: `foxsec`  
+**File**: [HealthScoreCalculator.cls](../force-app/main/default/classes/core/HealthScoreCalculator.cls)
+
+### Description
+
+Calculates security health scores based on audit results with severity weighting and grade assignment.
+
+### Constants
+
+```apex
+public static final Integer CRITICAL_WEIGHT = 15;
+public static final Integer CRITICAL_CAP = 60;
+public static final Integer HIGH_WEIGHT = 8;
+public static final Integer HIGH_CAP = 40;
+public static final Integer MEDIUM_WEIGHT = 3;
+public static final Integer MEDIUM_CAP = 20;
+public static final Integer LOW_WEIGHT = 1;
+public static final Integer LOW_CAP = 10;
+```
+
+### Inner Classes
+
+#### HealthScoreResult
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `score` | `Integer` | Health score (0-100) |
+| `grade` | `String` | Letter grade (A-F) |
+| `gradeColor` | `String` | SLDS color for grade |
+| `gradeLabel` | `String` | Human-readable label |
+| `criticalCount` | `Integer` | CRITICAL findings count |
+| `highCount` | `Integer` | HIGH/WARNING findings count |
+| `mediumCount` | `Integer` | MEDIUM findings count |
+| `lowCount` | `Integer` | LOW findings count |
+| `passCount` | `Integer` | PASS findings count |
+| `deductions` | `Map<String, Integer>` | Deductions by severity |
+
+#### GradeInfo
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `grade` | `String` | Letter grade |
+| `color` | `String` | SLDS color class |
+| `label` | `String` | Descriptive label |
+| `minScore` | `Integer` | Minimum score for grade |
+| `maxScore` | `Integer` | Maximum score for grade |
+
+### Public Methods
+
+#### calculateScore
+
+```apex
+public static HealthScoreResult calculateScore(List<FoxSecResult> results)
+```
+
+Calculates detailed health score with grade and deduction breakdown.
+
+#### calculateSimpleScore
+
+```apex
+public static Integer calculateSimpleScore(List<FoxSecResult> results)
+```
+
+Returns only the numeric score (0-100).
+
+#### getGrade
+
+```apex
+public static String getGrade(Integer score)
+```
+
+Returns letter grade for a given score.
+
+#### getGradeInfo
+
+```apex
+public static GradeInfo getGradeInfo(Integer score)
+```
+
+Returns complete grade information including color and label.
+
+### Usage Example
+
+```apex
+List<FoxSecResult> results = FoxSecController.runAllAudits();
+HealthScoreCalculator.HealthScoreResult scoreResult = HealthScoreCalculator.calculateScore(results);
+
+System.debug('Score: ' + scoreResult.score);
+System.debug('Grade: ' + scoreResult.grade);
+System.debug('Critical Issues: ' + scoreResult.criticalCount);
+```
+
+---
+
+## ComplianceTemplateService
+
+**Type**: `public with sharing class`  
+**Package**: `foxsec`  
+**File**: [ComplianceTemplateService.cls](../force-app/main/default/classes/compliance/ComplianceTemplateService.cls)
+
+### Description
+
+Provides compliance framework templates (SOC2, GDPR, HIPAA, ISO27001) that map FoxSec audit tests to regulatory controls.
+
+### Supported Templates
+
+| Template | Controls | Description |
+|----------|----------|-------------|
+| `SOC2` | 9 | Service Organization Control 2 |
+| `GDPR` | 7 | EU General Data Protection Regulation |
+| `HIPAA` | 7 | Health Insurance Portability and Accountability Act |
+| `ISO27001` | 8 | Information Security Management |
+
+### Inner Classes
+
+#### ComplianceControl
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `controlId` | `String` | Control identifier (e.g., CC6.1) |
+| `controlName` | `String` | Control name |
+| `description` | `String` | Control description |
+| `mappedTests` | `List<String>` | FoxSec test names mapped to this control |
+| `status` | `String` | Assessment status (PASS/FAIL/PARTIAL/NOT_ASSESSED) |
+| `passedTests` | `Integer` | Number of passed tests |
+| `totalTests` | `Integer` | Total mapped tests |
+
+#### ComplianceAssessment
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `templateName` | `String` | Template identifier |
+| `templateLabel` | `String` | Human-readable name |
+| `assessmentDate` | `Datetime` | Assessment timestamp |
+| `overallScore` | `Decimal` | Compliance percentage (0-100) |
+| `controls` | `List<ComplianceControl>` | Assessed controls |
+| `passedControls` | `Integer` | Fully compliant controls |
+| `partialControls` | `Integer` | Partially compliant controls |
+| `failedControls` | `Integer` | Non-compliant controls |
+| `totalControls` | `Integer` | Total controls assessed |
+
+### Public Methods
+
+#### getAvailableTemplates
+
+```apex
+public static List<ComplianceTemplateInfo> getAvailableTemplates()
+```
+
+Returns list of available compliance templates with metadata.
+
+#### runComplianceAssessment
+
+```apex
+public static ComplianceAssessment runComplianceAssessment(String templateName, List<FoxSecResult> auditResults)
+```
+
+Runs a compliance assessment against audit results using the specified template.
+
+#### getTemplateControls
+
+```apex
+public static List<ComplianceControl> getTemplateControls(String templateName)
+```
+
+Returns the control definitions for a template without assessment.
+
+### Usage Example
+
+```apex
+// Get available templates
+List<ComplianceTemplateService.ComplianceTemplateInfo> templates = 
+    ComplianceTemplateService.getAvailableTemplates();
+
+// Run SOC2 assessment
+List<FoxSecResult> results = FoxSecController.runAllAudits();
+ComplianceTemplateService.ComplianceAssessment assessment = 
+    ComplianceTemplateService.runComplianceAssessment('SOC2', results);
+
+System.debug('SOC2 Score: ' + assessment.overallScore + '%');
+System.debug('Passed Controls: ' + assessment.passedControls + '/' + assessment.totalControls);
+```
+
+---
+
+## AuditSnapshotService
+
+**Type**: `public with sharing class`  
+**Package**: `foxsec`  
+**File**: [AuditSnapshotService.cls](../force-app/main/default/classes/services/AuditSnapshotService.cls)
+
+### Description
+
+Manages audit snapshots for historical tracking and trend analysis. Persists audit results to `FoxSec_Audit_Snapshot__c` custom object.
+
+### Inner Classes
+
+#### TrendDataPoint
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `snapshotDate` | `Datetime` | Snapshot date |
+| `score` | `Integer` | Health score at that point |
+| `grade` | `String` | Grade at that point |
+| `criticalCount` | `Integer` | Critical issues count |
+| `highCount` | `Integer` | High issues count |
+| `mediumCount` | `Integer` | Medium issues count |
+| `lowCount` | `Integer` | Low issues count |
+| `formattedDate` | `String` | Date formatted for display |
+
+#### TrendAnalysis
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `dataPoints` | `List<TrendDataPoint>` | Historical data points |
+| `averageScore` | `Decimal` | Average score over period |
+| `scoreChange` | `Integer` | Change from first to last |
+| `trend` | `String` | IMPROVING/DECLINING/STABLE |
+| `periodStart` | `Datetime` | Analysis period start |
+| `periodEnd` | `Datetime` | Analysis period end |
+
+### Public Methods
+
+#### createSnapshot
+
+```apex
+public static Id createSnapshot(List<FoxSecResult> results, String complianceTemplate, Decimal complianceScore)
+```
+
+Creates a new audit snapshot with optional compliance data.
+
+#### getLatestSnapshot
+
+```apex
+public static FoxSec_Audit_Snapshot__c getLatestSnapshot()
+```
+
+Retrieves the most recent snapshot for the current org.
+
+#### getTrendAnalysis
+
+```apex
+public static TrendAnalysis getTrendAnalysis(Integer numberOfMonths)
+```
+
+Analyzes trends over the specified number of months.
+
+#### compareSnapshots
+
+```apex
+public static Map<String, Object> compareSnapshots(Id snapshot1Id, Id snapshot2Id)
+```
+
+Compares two snapshots and returns the differences.
+
+#### cleanupOldSnapshots
+
+```apex
+public static Integer cleanupOldSnapshots(Integer retentionMonths)
+```
+
+Deletes snapshots older than the retention period.
+
+### Usage Example
+
+```apex
+// Save current audit state
+List<FoxSecResult> results = FoxSecController.runAllAudits();
+Id snapshotId = AuditSnapshotService.createSnapshot(results, null, null);
+
+// Analyze 6-month trend
+AuditSnapshotService.TrendAnalysis trend = AuditSnapshotService.getTrendAnalysis(6);
+System.debug('Trend: ' + trend.trend + ' (Score change: ' + trend.scoreChange + ')');
+```
+
+---
+
+## AuditExportService
+
+**Type**: `public with sharing class`  
+**Package**: `foxsec`  
+**File**: [AuditExportService.cls](../force-app/main/default/classes/services/AuditExportService.cls)
+
+### Description
+
+Exports audit results to CSV and Excel formats for external audit documentation.
+
+### Inner Classes
+
+#### ExportOptions
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `includeTimestamp` | `Boolean` | Add timestamp to export |
+| `includeOrgInfo` | `Boolean` | Include org details |
+| `severityFilter` | `List<String>` | Filter by severity |
+| `fileName` | `String` | Custom filename |
+
+#### ExportResult
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `content` | `String` | Export content (CSV/XML) |
+| `fileName` | `String` | Generated filename |
+| `mimeType` | `String` | MIME type |
+| `recordCount` | `Integer` | Number of records exported |
+
+### Public Methods
+
+#### exportToCSV
+
+```apex
+public static ExportResult exportToCSV(List<FoxSecResult> results, ExportOptions options)
+```
+
+Exports detailed audit results to CSV format.
+
+#### exportSummaryToCSV
+
+```apex
+public static ExportResult exportSummaryToCSV(FoxSecController.AuditSummary summary, ExportOptions options)
+```
+
+Exports audit summary statistics to CSV.
+
+#### exportTrendDataToCSV
+
+```apex
+public static ExportResult exportTrendDataToCSV(AuditSnapshotService.TrendAnalysis trendData, ExportOptions options)
+```
+
+Exports trend analysis data to CSV.
+
+#### exportToExcel
+
+```apex
+public static ExportResult exportToExcel(List<FoxSecResult> results, ExportOptions options)
+```
+
+Exports to Excel XML format (SpreadsheetML).
+
+### Usage Example
+
+```apex
+// Export audit results to CSV
+List<FoxSecResult> results = FoxSecController.runAllAudits();
+AuditExportService.ExportOptions options = new AuditExportService.ExportOptions();
+options.includeTimestamp = true;
+options.includeOrgInfo = true;
+
+AuditExportService.ExportResult export = AuditExportService.exportToCSV(results, options);
+
+// Content is ready for download
+System.debug('File: ' + export.fileName);
+System.debug('Records: ' + export.recordCount);
 ```
 
 ---

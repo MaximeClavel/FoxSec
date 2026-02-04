@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Compliance_Template__c</fullName>
+    <description>Compliance framework used for this audit (if any).</description>
+    <externalId>false</externalId>
+    <label>Compliance Template</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>None</fullName>
+                <default>true</default>
+                <label>None</label>
+            </value>
+            <value>
+                <fullName>SOC2</fullName>
+                <default>false</default>
+                <label>SOC2</label>
+            </value>
+            <value>
+                <fullName>GDPR</fullName>
+                <default>false</default>
+                <label>GDPR</label>
+            </value>
+            <value>
+                <fullName>HIPAA</fullName>
+                <default>false</default>
+                <label>HIPAA</label>
+            </value>
+            <value>
+                <fullName>ISO27001</fullName>
+                <default>false</default>
+                <label>ISO27001</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
