@@ -20,7 +20,10 @@ Welcome to the **FoxSec - AppExchange Security Auditor** project documentation.
 - [Contributing Guide](./CONTRIBUTING.md) - How to contribute to the project
 - [Scratch Org Limitations](./SCRATCH_ORG_LIMITATIONS.md) - Technical constraints
 
-### 📋 Release
+### �️ Product Strategy
+- [Product Roadmap](./ROADMAP.md) - Feature phases and timeline (2026-2027)
+
+### �📋 Release
 - [Changelog](./CHANGELOG.md) - Version history
 
 ---
